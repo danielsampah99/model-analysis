@@ -27,14 +27,14 @@ class MainWindow(QMainWindow):
         page_layout.addLayout(self.stacklayout)
 
         # creating the tabs for the teams
-        team_a_tab_button = QPushButton("TEAM A")
+        team_a_tab_button = QPushButton("FINANCIAL ANALYST")
         team_a_tab_button.pressed.connect(self.activate_team_a_tab)
 
         tabs_layout.addWidget(team_a_tab_button)
         self.team_a_page = TeamAPage()
         self.stacklayout.addWidget(self.team_a_page)
 
-        team_b_tab_button = QPushButton("TEAM B")
+        team_b_tab_button = QPushButton("PROVIDER PARTNER")
         tabs_layout.addWidget(team_b_tab_button)
         self.team_b_page = TeamBPage()
         team_b_tab_button.pressed.connect(self.activate_team_b_tab)

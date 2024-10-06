@@ -5,6 +5,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+#  TODO: PROVIDER PARTNER TABS
+
+provider_partner_tabs = ['Rate Sheets']
 
 class TeamBPage(QWidget):
     def __init__(self) -> None:
