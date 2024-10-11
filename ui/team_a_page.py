@@ -15,9 +15,9 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
 )
-from PyQt6.QtCore import QAbstractTableModel, Qt, QModelIndex, QVariant
+from PyQt6.QtCore import QAbstractTableModel, Qt
 import pandas as pd
-import datetime
+# import datetime
 
 tab_list = ["Search", "Data" "Code", "Charge Master", "Scenarios", "Reports"]
 
@@ -64,36 +64,36 @@ class UploadFormDialog(QDialog):
 
         # LineEdit for filename input
         self.filename_input = QLineEdit(self)
-        form_layout.addRow("Name of Blue Shield Provider:", self.filename_input)
+        form_layout.addRow("Model Provider's name:", self.filename_input)
 
-        #  Bill type element of the form
-        self.bill_type_dropdown = QComboBox(self)
-        self.bill_type_dropdown.addItems(["Bill Type 1", "Bill Type 2", "Bill Type 3"])
-        form_layout.addRow("Bill Type", self.bill_type_dropdown)
+        #  MODEL LOB element of the form
+        self.model_lob_dropdown = QComboBox(self)
+        self.model_lob_dropdown.addItems(["Commercial", "SHP", "Medicaid"])
+        form_layout.addRow("Model LOB: ", self.model_lob_dropdown)
 
-        # mv eff dt element of the form
-        self.mv_eff_dt = QLineEdit(self)
-        form_layout.addRow("MV_EFF_DT", self.mv_eff_dt)
+        # # mv eff dt element of the form
+        # self.mv_eff_dt = QLineEdit(self)
+        # form_layout.addRow("MV_EFF_DT", self.mv_eff_dt)
 
-        # par in network 0011
-        self.par_in_network_011 = QLineEdit(self)
-        form_layout.addRow("Par in Network 0011", self.par_in_network_011)
+        # # par in network 0011
+        # self.par_in_network_011 = QLineEdit(self)
+        # form_layout.addRow("Par in Network 0011", self.par_in_network_011)
 
-        # wh flag descending
-        self.wh_flag_desc = QLineEdit(self)
-        form_layout.addRow("WH FLAG DESC", self.wh_flag_desc)
+        # # wh flag descending
+        # self.wh_flag_desc = QLineEdit(self)
+        # form_layout.addRow("WH FLAG DESC", self.wh_flag_desc)
 
-        # MV STUS C
-        self.mv_stus_c = QLineEdit(self)
-        form_layout.addRow("MV_STUS_C", self.mv_stus_c)
+        # # MV STUS C
+        # self.mv_stus_c = QLineEdit(self)
+        # form_layout.addRow("MV_STUS_C", self.mv_stus_c)
 
-        # LAST UPDATE
-        self.last_update = QLineEdit(self)
-        form_layout.addRow("Last Update", self.last_update)
+        # # LAST UPDATE
+        # self.last_update = QLineEdit(self)
+        # form_layout.addRow("Last Update", self.last_update)
 
-        # ADDRESS LINE ONE
-        self.address_line_1 = QLineEdit(self)
-        form_layout.addRow("Address LIne 1", self.address_line_1)
+        # # ADDRESS LINE ONE
+        # self.address_line_1 = QLineEdit(self)
+        # form_layout.addRow("Address LIne 1", self.address_line_1)
 
         # Button to select a file
         self.file_button = QPushButton(
@@ -141,6 +141,9 @@ class UploadFormDialog(QDialog):
             )
             return
 
+        if not self.model_lob_dropdown:
+            QMessageBox.warning(self, 'Error', "Please a select a value form the Model LOB field")
+
         if not blue_shield_provider_name:
             QMessageBox.warning(
                 self, "Error", "Please enter the Blue Shield Provider's name"
@@ -150,6 +153,7 @@ class UploadFormDialog(QDialog):
         self.load_provider_from_csv(
             file_path=self.selected_file,
             blue_shield_provider_name=blue_shield_provider_name,
+            model_lob_value=self.model_lob_dropdown.currentText()
         )
 
         print(
@@ -165,7 +169,7 @@ class UploadFormDialog(QDialog):
 
         self.accept()
 
-    def load_provider_from_csv(self, file_path: str, blue_shield_provider_name: str):
+    def load_provider_from_csv(self, file_path: str, blue_shield_provider_name: str, model_lob_value: str):
         # #  clear existing data in the grid table.
         # self.model.clear()
 
@@ -186,7 +190,7 @@ class UploadFormDialog(QDialog):
 
                 #  save the output file.
                 # get current timestamp
-                timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                # timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
                 destination_path = os.path.join(
                     f"{base_directory}", "providers", blue_shield_provider_name
@@ -196,7 +200,7 @@ class UploadFormDialog(QDialog):
                 )  # create the directory is it's non-existent.
 
                 output_file_name = os.path.join(
-                    destination_path, f"{blue_shield_provider_name.lower()}_{timestamp}.csv"
+                    destination_path, f"{blue_shield_provider_name.lower()}_{model_lob_value.upper()}.csv"
                 )  # constructing the output file's name.
 
                 dataframe.to_csv(output_file_name, index=False)
