@@ -18,10 +18,14 @@ from .upload_form_dialog import UploadFormDialog
 
 base_directory = os.getcwd()
 
+
 class SearchTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.current_df = (
+            None  # the current dataframe that is displayed in the tree view
+        )
         self._init_ui()
 
     def _init_ui(self):
@@ -30,13 +34,15 @@ class SearchTab(QWidget):
         button_layout = QHBoxLayout()
 
         upload_button = QPushButton("Upload IDs")
-        download_template_button = QPushButton("Run Query")
+        run_query_button = QPushButton("Run Query")
 
         upload_button.clicked.connect(self.upload_ids_file_slot)
-        download_template_button.clicked.connect(self.download_template_slot)
+        run_query_button.clicked.connect(
+            self.run_query_slot
+        )  # TODO: This button will instead connect to the slot that does the main query
 
         button_layout.addWidget(upload_button)
-        button_layout.addWidget(download_template_button)
+        button_layout.addWidget(run_query_button)
 
         search_layout.addLayout(button_layout)
 
@@ -62,15 +68,29 @@ class SearchTab(QWidget):
 
     def update_table_model(self, dataframe: pd.DataFrame) -> None:
         """Update the table view with new data."""
-        model = BlueShieldIdModel(dataframe)
-        self.table_view.setModel(model)
+        # self.current_df = dataframe
+        # model = BlueShieldIdModel(dataframe)
+        # self.table_view.setModel(model)
+
+        if dataframe is None or dataframe.empty:
+            print("DataFrame is None or empty!")  # Debugging step
+        else:
+            print(dataframe.head())  # Print the first few rows for verification
+
+        self.current_df = dataframe  # Store the new dataframe
+
+        try:
+            # Check if the model is correctly initialized with the dataframe
+            model = BlueShieldIdModel(dataframe)
+            self.table_view.setModel(model)
+
+        except Exception as e:
+            print(f"Error in updating table model: {e}")
 
     @pyqtSlot()
     def download_template_slot(self) -> None:
         """Download the template file to the user's Downloads folder."""
-        template_file = os.path.join(
-            self.base_directory, "resources", "template_ids.csv"
-        )
+        template_file = os.path.join(base_directory, "resources", "template_ids.csv")
 
         if os.path.isfile(template_file):
             destination = os.path.join(
@@ -103,94 +123,86 @@ class SearchTab(QWidget):
         """Handle the loaded data from the UploadFormDialog."""
         self.update_table_model(dataframe)
 
+    @pyqtSlot()
+    def run_query_slot(self) -> None:
+        """Run the query using the data store.csv file against the uploaded ids file"""
+        # print(self.current_df.columns)
+        if self.current_df is None or self.current_df.empty:
+            QMessageBox.warning(self, "No Data", "No Data available for search query.")
+            return
 
-# class SearchTabs(QWidget):
-#     def __init__(self) -> None:
-#         super().__init__()
+        data_store_path = os.path.join(base_directory, "resources", "data store.csv")
+        if not os.path.exists(data_store_path):
+            QMessageBox.critical(self, "Error", "Data store file not found.")
+            return
 
-#         search_layout = QVBoxLayout()
-#         button_layout = QHBoxLayout()
+        try:
+            data_store_df = pd.read_csv(data_store_path)
+            print(f"data store columns = {data_store_df}")
 
-#         upload_button = QPushButton("Upload IDs")
-#         run_query_button = QPushButton("Download Template")
+            if "BS_ID" not in data_store_df.columns:
+                QMessageBox.critical(
+                    self, "Error", "'data store.csv' must contain 'BS_ID' column."
+                )
+                return
 
-#         self.table_widget = QTableView()
-#         # view_ids_table_widget = QWidget()
+            self.process_csv_file(data_store_df)
 
-#         run_query_button.pressed.connect(self.download_template_slot)
-#         upload_button.pressed.connect(self.upload_ids_file_slot)
+        except Exception as e:
+            QMessageBox.critical(
+                self, "Error", f"Failed to load data store file: {str(e)}"
+            )
 
-#         button_layout.addWidget(upload_button)
-#         button_layout.addWidget(run_query_button)
+    def process_csv_file(self, data_store_df: pd.DataFrame) -> None:
+        """Process the data store csv file and merge it with the current data."""
+        try:
+            if data_store_df.empty:
+                raise ValueError("The data store file is empty")
 
-#         search_layout.addLayout(button_layout)
+            common_id_name = "BS_ID"
+            # if common_id_name not in data_store_df.columns or common_id_name not in self.current_df.columns:
+            #     raise ValueError(f"Column '{common_id_name}' is not a valid column name in the datasets.")
 
-#         # Loading the template file into the dataframe
-#         try:
-#             template_file = os.path.join(
-#                 base_directory, "resources", "template_ids.csv"
-#             )
-#             self.dataframe = pd.read_csv(template_file)
-#             self.model = BlueShieldIdModel(self.dataframe)
+            merged_df = pd.merge(
+                self.current_df,
+                data_store_df,
+                how="left",
+                on=common_id_name,
+                suffixes=("", "_store"),
+            )
 
-#             #  setting up the table view
-#             self.table = QTableView()
-#             self.table.setModel(self.model)
+            print("exporting data to csv")
 
-#         except Exception as e:
-#             QMessageBox.critical(
-#                 self, "Something went wrong", f"Failed to show template file: {str(e)}"
-#             )
+            output_dir = os.path.join(base_directory, "resources")
+            os.makedirs(
+                output_dir, exist_ok=True
+            )  # Create the directory if it doesn't exist
 
-#         # adding the table mdoel to the view.
-#         self.form_dialog = UploadFormDialog(self)
-#         self.blue_shield_data = self.form_dialog.blue_shield_id_data
+            try:
+                print("exporting data to csv")
+                output_path = os.path.join(output_dir, "output.csv")
+                merged_df.to_csv(output_path, index=False)
+                print("Data exported successfully to:", output_path)
+            except Exception as e:
+                print(f"Failed to export data to CSV: {e}")
 
-#         print(self.blue_shield_data)
+            self.update_table_model(merged_df)
+            QMessageBox.information(self, "Query Complete", "Data updated.")
 
-#         self.blue_shield_id_model = BlueShieldIdModel(
-#             self.blue_shield_data
-#         )  # find a way to get the dataframe into this.
-#         self.table.setModel(self.blue_shield_id_model)
-#         search_layout.addWidget(self.table_widget)
+            # update the columns with data from the store where available.
+            # for column in data_store_df.columns:
+            #     if column != common_id_name:
+            #         merged_df[column] = merged_df[column].fillna(merged_df[f"{column}_store"])
+            #         merged_df = merged_df.drop(columns=[f'{column}_store'])
 
-#         self.setLayout(search_layout)
+            # # Remove rows where no match was found.
+            # merged_df = merged_df.dropna(subset=data_store_df.columns, how='all')
 
-#     def download_template_slot(self):
-#         template_file = os.path.join(base_directory, "resources", "template_ids.csv")
+            # if merged_df.equals(self.current_df):
+            #     QMessageBox.information(self, "No Changes", "No new information returned from query")
 
-#         #  check if file exists. if it exists, download the file to the users computer. and alert them the file has been downloaded.
-#         if os.path.isfile(template_file):
-#             destination = os.path.join(
-#                 os.path.expanduser("~"), "Downloads", "template_ids.csv"
-#             )
-
-#             shutil.copy(template_file, destination)
-
-#             #  show a file download complete alert to the user
-#             QMessageBox.information(
-#                 self,
-#                 "File Download Success.",
-#                 f"Templage file was downlaoded to {destination}",
-#             )
-
-#         else:
-#             QMessageBox.warning(
-#                 self,
-#                 "File Not Found Error",
-#                 "File was unable to download. please try again.",
-#             )
-
-#     def upload_ids_file_slot(self):
-#         """Open the form dialog and enter necessary values.
-#         Save the uploaded file to a directory on the S Drive"""
-#         formDialog = UploadFormDialog(self)
-#         # dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-#         # dialog.setDirectory(
-#         #     os.path.join(os.path.expanduser("~"), "Downloads")
-#         # )
-#         # dialog.setNameFilter("File containing list of ids(*.csv)")
-#         # dialog.setViewMode(QFileDialog.ViewMode.List)
-
-#         if formDialog.exec() == QDialog.DialogCode.Accepted:
-#             print("Dialog submission was successful...")
+        except Exception as e:
+            print(f"Error: {e}")
+            QMessageBox.critical(
+                self, "Error", f"Failed to process the query, {str(e)}"
+            )

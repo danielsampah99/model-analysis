@@ -47,7 +47,7 @@ class UploadFormDialog(QDialog):
         form_layout.addRow("Model Line Of Business: ", self.model_lob_dropdown)
 
         # File selection button and label.
-        self.file_button = QPushButton("Select Blue Shied Provider IDs", self)
+        self.file_button = QPushButton("Select Model Provider IDs", self)
         self.file_button.clicked.connect(self.select_file)
         self.selected_file_label = QLabel("")  # Initialized with empty text
         form_layout.addRow(self.file_button, self.selected_file_label)
@@ -155,7 +155,8 @@ class UploadFormDialog(QDialog):
                 raise ValueError("Unsupported file type")
 
             # add the blue shield provider name as the second column.
-            dataframe.insert(1, "Blue Shield Provider Name", blue_shield_provider_name)
+            dataframe.insert(1, "Model Name", blue_shield_provider_name)
+            dataframe.insert(2, "Model Line of Business", model_lob_value)
 
             destination_path = os.path.join(
                 f"{base_directory}", "providers", blue_shield_provider_name
