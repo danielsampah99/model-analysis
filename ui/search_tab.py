@@ -1,7 +1,8 @@
 import shutil
-from fileinput import filename
+import subprocess
+import platform
 
-from PyQt6.QtGui import QIcon, QKeySequence, QColor
+from PyQt6.QtGui import QIcon, QKeySequence
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -11,7 +12,7 @@ from PyQt6.QtWidgets import (
     QMessageBox,
     QDialog, QLabel, QSpacerItem, QSizePolicy,
 )
-from PyQt6.QtCore import pyqtSlot, QSize, Qt
+from PyQt6.QtCore import pyqtSlot, QSize
 import os
 import pandas as pd
 
@@ -76,6 +77,8 @@ class SearchTab(QWidget):
         edit_button.setMaximumWidth(200)
         edit_button.setIconSize(QSize(20, 20))
         edit_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+
+        edit_button.clicked.connect(self.on_edit_click)
 
 
         # REFRESH BUTTON
@@ -263,3 +266,21 @@ class SearchTab(QWidget):
             QMessageBox.critical(
                 self, "Error", f"Failed to process the query, {str(e)}"
             )
+
+    def on_edit_click(self) -> None:
+        file_to_open = self.form_dialog.saved_file_path
+
+        if not file_to_open:
+            QMessageBox.critical(self, "File Not Found Error", "No file to edit...")
+            return
+        try:
+            if platform.system() == "Darwin":
+                subprocess.run(['open', file_to_open], check=True)
+            elif platform.system() == "Windows":
+                os.startfile(file_to_open)
+            else:
+                subprocess.run(['xdg-open', file_to_open])
+
+        except Exception as e:
+            print("Error", f"Failed to open file: {e}")
+            QMessageBox.critical(self, "Error", f"Failed to open file: {e}")

@@ -21,10 +21,12 @@ base_directory = os.getcwd()
 
 class UploadFormDialog(QDialog):
     data_loaded = pyqtSignal(pd.DataFrame)
-    saved_file_path = pyqtSignal(str)
+    saved_file_path_signal = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
+
+        self.saved_file_path: str = ""
 
         self.setWindowTitle("Blue Shield Provider IDs Form")
         # self.setGeometry(500, 500, 500, 500)
@@ -204,4 +206,5 @@ class UploadFormDialog(QDialog):
 
     def push_file_path(self, file_path: str) -> None:
         print(f"This is the file path being passed to the signal: {file_path}")
-        self.saved_file_path.emit(file_path)
+        self.saved_file_path = file_path
+        self.saved_file_path_signal.emit(self.saved_file_path)  # Emit the updated path
