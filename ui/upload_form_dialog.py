@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
 )
-from PyQt6.QtCore import pyqtSignal, QSize
+from PyQt6.QtCore import pyqtSignal, QSize, pyqtSlot
 
 from typing import Optional
 import pandas as pd
@@ -204,6 +204,7 @@ class UploadFormDialog(QDialog):
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Error loading {file_path}: {e}")
 
+    @pyqtSlot(str)
     def push_file_path(self, file_path: str) -> None:
         print(f"This is the file path being passed to the signal: {file_path}")
         self.saved_file_path = file_path

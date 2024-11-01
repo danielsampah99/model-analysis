@@ -87,8 +87,9 @@ class SearchTab(QWidget):
         refresh_button.setMinimumWidth(20)
         refresh_button.setMaximumWidth(200)
         refresh_button.setIconSize(QSize(20, 20))
-        refresh_button.setStyleSheet(
-            "border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+        refresh_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+
+        refresh_button.clicked.connect(self.on_refresh_click)
 
         button_layout.addWidget(upload_button)
         button_layout.addWidget(run_query_button)
@@ -284,3 +285,18 @@ class SearchTab(QWidget):
         except Exception as e:
             print("Error", f"Failed to open file: {e}")
             QMessageBox.critical(self, "Error", f"Failed to open file: {e}")
+
+    @pyqtSlot()
+    def on_refresh_click(self) -> None:
+        """Slot to update the table when the refresh button is clicked"""
+        file_path = self.form_dialog.saved_file_path
+        if not file_path:
+            QMessageBox.critical(self, "Error", "No updated file to refresh or file's destination may have changed")
+            return
+
+        try:
+            updated_df = pd.read_csv(file_path)
+            self.form_dialog.data_loaded.emit(updated_df)
+            # TODO: toast notification for a successful refresh
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to read file: {e}")
