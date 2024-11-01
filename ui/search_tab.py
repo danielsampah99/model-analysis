@@ -1,4 +1,7 @@
 import shutil
+from fileinput import filename
+
+from PyQt6.QtGui import QIcon, QKeySequence, QColor
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -6,9 +9,9 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QTableView,
     QMessageBox,
-    QDialog,
+    QDialog, QLabel, QSpacerItem, QSizePolicy,
 )
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, QSize, Qt
 import os
 import pandas as pd
 
@@ -23,6 +26,8 @@ class SearchTab(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.form_dialog = UploadFormDialog(self)
+
         self.current_df = (
             None  # the current dataframe that is displayed in the tree view
         )
@@ -33,18 +38,70 @@ class SearchTab(QWidget):
         search_layout = QVBoxLayout()
         button_layout = QHBoxLayout()
 
-        upload_button = QPushButton("Upload IDs")
-        run_query_button = QPushButton("Run Query")
+        self.form_dialog.setStyleSheet("background-color: #f8fafc; padding: 20px 16px 16px; border-radius: 6px; ")
 
+        # styling the upload button
+        raw_upload_button_icon = QIcon("./icons/upload_ids_icon")
+
+        upload_button = QPushButton(icon=raw_upload_button_icon, text="Upload Ids")
+        upload_button.setMinimumHeight(40)
+        upload_button.setMaximumWidth(200)
+        upload_button.setIconSize(QSize(20, 20))
+
+
+        upload_button.setStyleSheet("background-color: rgba(0, 0, 250, 0.5); color: white; font-weight: 600; " "border-radius: 8px; ")
+
+        # Keyboard shortcut for the upload button.
+        upload_button_shortcut = QKeySequence("CTRL+U")
+        upload_button.setShortcut(upload_button_shortcut)
+
+        # Slot for the upload button
         upload_button.clicked.connect(self.upload_ids_file_slot)
-        run_query_button.clicked.connect(
-            self.run_query_slot
-        )  # TODO: This button will instead connect to the slot that does the main query
+
+        # Run Query button
+        run_query_icon = QIcon("./icons/run_query_icon.svg")
+        run_query_button = QPushButton(icon=run_query_icon, text="Run Query")
+        run_query_button.setMinimumWidth(20)
+        run_query_button.setMaximumWidth(200)
+        run_query_button.setIconSize(QSize(20, 20))
+        run_query_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+
+        # run query button slot
+        run_query_button.clicked.connect(self.run_query_slot)  # TODO: This button will instead connect to the slot that does the main query
+
+        # EDIT BUTTON
+        edit_icon = QIcon("./icons/edit_file_icon.svg")
+        edit_button = QPushButton(icon=edit_icon, text="Edit")
+        edit_button.setMinimumWidth(20)
+        edit_button.setMaximumWidth(200)
+        edit_button.setIconSize(QSize(20, 20))
+        edit_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+
+
+        # REFRESH BUTTON
+        refresh_icon = QIcon("./icons/refresh_file_icon.svg")
+        refresh_button = QPushButton(icon=refresh_icon, text="Refresh")
+        refresh_button.setMinimumWidth(20)
+        refresh_button.setMaximumWidth(200)
+        refresh_button.setIconSize(QSize(20, 20))
+        refresh_button.setStyleSheet(
+            "border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
 
         button_layout.addWidget(upload_button)
         button_layout.addWidget(run_query_button)
+        button_layout.addWidget(edit_button)
+        button_layout.addWidget(refresh_button)
 
-        search_layout.addLayout(button_layout)
+        heading_text = QLabel("WELCOME, Financial Analyst")
+        heading_text.setStyleSheet("font-size: 30px; margin: 10px 0px; line-height: 28px; font-weight: bold; color: #0f172a; ")
+
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(heading_text)
+        header_layout.addLayout(button_layout)
+        header_layout.addSpacerItem(QSpacerItem(0 ,20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Ignored))
+
+
+        search_layout.addLayout(header_layout)
 
         self.table_view = QTableView()
         search_layout.addWidget(self.table_view)
@@ -112,7 +169,7 @@ class SearchTab(QWidget):
     @pyqtSlot()
     def upload_ids_file_slot(self) -> None:
         """Open the form dialog to upload IDs file."""
-        form_dialog = UploadFormDialog(self)
+        form_dialog = self.form_dialog
         form_dialog.data_loaded.connect(self.on_data_loaded)
 
         if form_dialog.exec() == QDialog.DialogCode.Accepted:
