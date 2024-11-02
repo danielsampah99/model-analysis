@@ -1,6 +1,7 @@
 import shutil
 import subprocess
 import platform
+from typing import Optional
 
 from PyQt6.QtGui import QIcon, QKeySequence
 from PyQt6.QtWidgets import (
@@ -29,9 +30,8 @@ class SearchTab(QWidget):
 
         self.form_dialog = UploadFormDialog(self)
 
-        self.current_df = (
-            None  # the current dataframe that is displayed in the tree view
-        )
+        self.current_df = None  # the current dataframe that is displayed in the tree view
+        self.current_file_path: Optional[str] = None
         self._init_ui()
 
     def _init_ui(self):
@@ -48,9 +48,7 @@ class SearchTab(QWidget):
         upload_button.setMinimumHeight(40)
         upload_button.setMaximumWidth(200)
         upload_button.setIconSize(QSize(20, 20))
-
-
-        upload_button.setStyleSheet("background-color: rgba(0, 0, 250, 0.5); color: white; font-weight: 600; " "border-radius: 8px; ")
+        upload_button.setStyleSheet("background-color: #3b82f6; padding: 8px 12px; color: white; font-weight: 600; border-radius: 6px; font-size: 14px; line-height: 20px; font-weight: 600;")
 
         # Keyboard shortcut for the upload button.
         upload_button_shortcut = QKeySequence("CTRL+U")
@@ -96,7 +94,7 @@ class SearchTab(QWidget):
         button_layout.addWidget(edit_button)
         button_layout.addWidget(refresh_button)
 
-        heading_text = QLabel("WELCOME, Financial Analyst")
+        heading_text = QLabel("WELCOME...")
         heading_text.setStyleSheet("font-size: 30px; margin: 10px 0px; line-height: 28px; font-weight: bold; color: #0f172a; ")
 
         header_layout = QHBoxLayout()
@@ -123,9 +121,7 @@ class SearchTab(QWidget):
             dataframe = pd.read_csv(template_file)
             self.update_table_model(dataframe)
         except Exception as e:
-            QMessageBox.critical(
-                self, "Error", f"Failed to load template file: {str(e)}"
-            )
+            QMessageBox.critical(self, "Error", f"Failed to load template file: {str(e)}")
 
     def update_table_model(self, dataframe: pd.DataFrame) -> None:
         """Update the table view with new data."""
@@ -289,14 +285,51 @@ class SearchTab(QWidget):
     @pyqtSlot()
     def on_refresh_click(self) -> None:
         """Slot to update the table when the refresh button is clicked"""
-        file_path = self.form_dialog.saved_file_path
-        if not file_path:
-            QMessageBox.critical(self, "Error", "No updated file to refresh or file's destination may have changed")
+
+
+        # Determine which file path to use
+        active_file_path = None
+
+        if self.current_file_path:
+            active_file_path = self.current_file_path  # Use sidebar file if available
+            print(f"Refreshing sidebar file: {active_file_path}")
+        elif self.form_dialog.saved_file_path:
+            active_file_path = self.form_dialog.saved_file_path  # Use uploaded file if no sidebar file
+            print(f"Refreshing uploaded file: {active_file_path}")
+
+        if not active_file_path:
+            QMessageBox.critical(self, "Error", "No file available to refresh")
             return
 
+        if not os.path.exists(active_file_path):
+            QMessageBox.critical(self, "Error", f"File not found: {active_file_path}")
+            return
+
+        # file_path = self.current_file_path or self.form_dialog.saved_file_path
+        # if not active_file_path:
+        #     QMessageBox.critical(self, "Error", "No updated file to refresh or file's destination may have changed")
+        #     return
+
         try:
-            updated_df = pd.read_csv(file_path)
+            print(f"file from sidebar: {active_file_path}")
+            updated_df = pd.read_csv(active_file_path)
             self.form_dialog.data_loaded.emit(updated_df)
+            self.update_table_model(updated_df)
             # TODO: toast notification for a successful refresh
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to read file: {e}")
+
+    @pyqtSlot(str)
+    def on_load_sidebar_file_to_table(self, file_path: str) -> None:
+        """Load the selected file from FileExplorer sidebar into the table view."""
+        print(f"load_file_to_table called with file_path: {file_path}")
+        try:
+            self.current_file_path = file_path
+            self.form_dialog.saved_file_path = file_path
+            dataframe = pd.read_csv(file_path)
+
+
+            self.update_table_model(dataframe)
+            QMessageBox.information(self, "File Loaded", f"Loaded data from {file_path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load file: {e}")

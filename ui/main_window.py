@@ -1,13 +1,17 @@
+import os
+
+import pandas as pd
 from PyQt6.QtWidgets import (
     QWidget,
     QMainWindow,
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
-    QStackedLayout,
+    QStackedLayout, QDockWidget,
 )
+from PyQt6.QtCore import Qt, pyqtSlot
 
-
+from .file_explorer import FileExplorer
 from .team_a_page import TeamAPage
 from .team_b_page import TeamBPage
 
@@ -18,6 +22,22 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Model Analysis")
         self.setMinimumSize(1000, 1000)
+
+        # getting the directory
+        base_directory = os.path.join(os.getcwd(), 'providers')
+        print(f"base directory: {base_directory}")
+
+        # sidebar
+        self.file_explorer = FileExplorer(base_directory)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.file_explorer)
+        # Connect signals with debug prints
+        print(f"Before: {self.file_explorer.file_selected}")
+        self.file_explorer.file_selected.connect(self.on_file_selected)
+        # self.file_explorer.file_selected.emit("/Documents/projects/model-analysis/providers/Netflix/NETFLIX_SHP.csv")
+        print(f"After: {self.file_explorer.file_selected}")
+
+
+
 
         # Creating the different layouts
         page_layout = QVBoxLayout()
@@ -51,3 +71,9 @@ class MainWindow(QMainWindow):
 
     def activate_team_b_tab(self):
         self.stack_layout.setCurrentIndex(1)
+
+    def on_file_selected(self, file_path: str):
+        print(f"file being loaded: {file_path}")
+        self.team_a_page.search_tab.on_load_sidebar_file_to_table(file_path)
+
+
