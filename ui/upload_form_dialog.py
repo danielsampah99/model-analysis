@@ -131,6 +131,8 @@ class UploadFormDialog(QDialog):
         blue_shield_provider_name = self.filename_input.text()
         model_lob_value = self.model_lob_dropdown.currentText()
 
+
+        # Form Validation
         if not selected_file_name_value:
             QMessageBox.warning(
                 self, "Error", "please select a file that contains only the ids."
@@ -174,7 +176,7 @@ class UploadFormDialog(QDialog):
             dataframe.insert(1, "Model Name", blue_shield_provider_name)
             dataframe.insert(2, "Model Line of Business", model_lob_value)
 
-            destination_path = os.path.join(f"{base_directory}", "providers", blue_shield_provider_name)
+            destination_path = os.path.join(f"{base_directory}", "providers", "raw-ids", blue_shield_provider_name)
             os.makedirs(
                 destination_path, exist_ok=True
             )  # create the directory is it's non-existent.

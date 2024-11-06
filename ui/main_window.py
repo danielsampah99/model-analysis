@@ -21,20 +21,16 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Model Analysis")
-        self.setMinimumSize(1000, 1000)
+        self.setMinimumSize(800, 800)
 
         # getting the directory
-        base_directory = os.path.join(os.getcwd(), 'providers')
-        print(f"base directory: {base_directory}")
+        base_directory = os.path.join(os.getcwd(), 'providers', 'raw-ids')
 
         # sidebar
         self.file_explorer = FileExplorer(base_directory)
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.file_explorer)
-        # Connect signals with debug prints
-        print(f"Before: {self.file_explorer.file_selected}")
         self.file_explorer.file_selected.connect(self.on_file_selected)
-        # self.file_explorer.file_selected.emit("/Documents/projects/model-analysis/providers/Netflix/NETFLIX_SHP.csv")
-        print(f"After: {self.file_explorer.file_selected}")
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.file_explorer)
+
 
 
 
@@ -49,7 +45,7 @@ class MainWindow(QMainWindow):
 
         # creating the tabs for the teams
         team_a_tab_button = QPushButton("FINANCIAL ANALYST")
-        team_a_tab_button.clicked.connect(self.activate_team_a_tab)
+        team_a_tab_button.clicked.connect(self.activate_team_a_tab) #type: ignore
 
         tabs_layout.addWidget(team_a_tab_button)
         self.team_a_page = TeamAPage()
