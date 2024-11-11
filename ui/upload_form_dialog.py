@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QIcon, QColor
 from PyQt6.QtWidgets import (
     QComboBox,
     QPushButton,
@@ -10,14 +10,30 @@ from PyQt6.QtWidgets import (
     QDialog,
     QFormLayout,
     QLabel,
-    QLineEdit,
+    QLineEdit, QGraphicsDropShadowEffect,
 )
-from PyQt6.QtCore import pyqtSignal, QSize, pyqtSlot
+from PyQt6.QtCore import pyqtSignal, QSize, pyqtSlot, Qt
 
 from typing import Optional
 import pandas as pd
 
 base_directory = os.getcwd()
+
+upload_form_styles = """
+    QDialog {
+        border: 2px solid #3498db;  
+        border-radius: 8px;         
+        background-color: white;  
+        border-radius: 6px; 
+        padding: 8px 12px; 
+        color: #111827; 
+        border: 0.725 solid #d1d5db; 
+        background-color: white; 
+        font-size: 14px; 
+        line-height: 20px; 
+        font-weight: 600; 
+    }
+"""
 
 class UploadFormDialog(QDialog):
     data_loaded = pyqtSignal(pd.DataFrame)
@@ -31,6 +47,8 @@ class UploadFormDialog(QDialog):
         self.setWindowTitle("Blue Shield Provider IDs Form")
         # self.setGeometry(500, 500, 500, 500)
         self.resize(QSize(500, 270))
+        self.setStyleSheet(upload_form_styles)
+        self.setWindowFlags(Qt.WindowType.Dialog)
 
         self.blue_shield_id_data = pd.DataFrame()
         self.selected_file: Optional[str] = None

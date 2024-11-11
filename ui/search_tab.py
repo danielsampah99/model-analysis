@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QTableView,
     QMessageBox,
-    QDialog, QLabel, QSpacerItem, QSizePolicy,
+    QDialog, QLabel, QSpacerItem, QSizePolicy, QMenu,
 )
 from PyQt6.QtCore import pyqtSlot, QSize
 import os
@@ -23,6 +23,44 @@ from .upload_form_dialog import UploadFormDialog
 
 base_directory = os.getcwd()
 
+dropdown_button_styles = """
+            QPushButton {
+                background-color: white;
+                border: 1px solid #D1D5DB;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-size: 14px;
+                font-weight: 600;
+                line-height: 20px;
+                color: #111827;
+                text-align: left;
+            }
+            QPushButton:hover {
+                background-color: #F9FAFB;
+            }
+            QPushButton:pressed {
+                background-color: #F3F4F6;
+            }
+        """
+
+dropdown_menu_styles = """
+            QMenu {
+                background-color: white;
+                border: 1px solid #E5E7EB;
+                border-radius: 6px;
+                padding: 4px 4px;
+                margin-top: 4px;
+            }
+            QMenu::item {
+                padding: 8px 32px 8px 8px;
+                font-size: 14px;
+                color: #374151;
+                width: 100%;
+            }
+            QMenu::item:selected {
+                background-color: #F3F4F6;
+            }
+        """
 
 class SearchTab(QWidget):
     def __init__(self, parent=None):
@@ -39,10 +77,35 @@ class SearchTab(QWidget):
         search_layout = QVBoxLayout()
         button_layout = QHBoxLayout()
 
-        self.form_dialog.setStyleSheet("background-color: #f8fafc; padding: 20px 16px 16px; border-radius: 6px; ")
+        self.form_dialog.setStyleSheet("background-color: #f8fafc; padding: 20px 16px 16px; border-radius: 6px;")
 
         # styling the upload button
         raw_upload_button_icon = QIcon("./icons/upload_ids_icon")
+
+        #  CREATING THE UPLOAD DROPDOWN.
+        # trigger
+        self.upload_dropdown_button = QPushButton(text="Upload IDs")
+        self.upload_dropdown_button.setStyleSheet(dropdown_button_styles)
+        self.upload_dropdown_button.setIcon(raw_upload_button_icon)
+        self.upload_dropdown_button.setIconSize(QSize(20, 20))
+
+        # menu
+        self.upload_dropdown_menu = QMenu(self)
+        self.upload_dropdown_menu.setStyleSheet(dropdown_menu_styles)
+
+        #  template menu action
+        self.useTemplateMenu = self.upload_dropdown_menu.addAction("Use Template")
+        self.useTemplateMenuIcon = QIcon("./icons/use-template-icon.svg")
+        self.useTemplateMenu.setIcon(self.useTemplateMenuIcon)
+        self.useTemplateMenu.triggered.connect(self.upload_ids_file_slot)
+
+        # single id menu action
+        self.single_id_menu = self.upload_dropdown_menu.addAction("Single ID")
+        self.single_id_menu_icon = QIcon("./icons/use-single-id-icon.svg")
+        self.single_id_menu.setIcon(self.single_id_menu_icon)
+
+
+
 
         upload_button = QPushButton(icon=raw_upload_button_icon, text="Upload Ids")
         upload_button.setMinimumHeight(40)
@@ -89,6 +152,8 @@ class SearchTab(QWidget):
 
         refresh_button.clicked.connect(self.on_refresh_click)
 
+        self.upload_dropdown_button.setMenu(self.upload_dropdown_menu)
+        button_layout.addWidget(self.upload_dropdown_button)
         button_layout.addWidget(upload_button)
         button_layout.addWidget(run_query_button)
         button_layout.addWidget(edit_button)
@@ -307,7 +372,7 @@ class SearchTab(QWidget):
 
         # file_path = self.current_file_path or self.form_dialog.saved_file_path
         # if not active_file_path:
-        #     QMessageBox.critical(self, "Error", "No updated file to refresh or file's destination may have changed")
+        #     QMessageBox.critical(self, "Error", "No updated file to refresh || file's destination may have changed")
         #     return
 
         try:

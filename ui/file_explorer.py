@@ -26,16 +26,8 @@ from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
 #         color: black; /* Text color when selected */
 #     }
 #
-#     QTreeWidget::branch:open:has-children {
-#         image: url('./icons/open_folder_icon.svg'); /* Icon for open folder */
-#     }
-#
-#     QTreeWidget::branch:closed:has-children {
-#         image: url('./icons/closed_folder_icon.svg'); /* Icon for closed folder */
-#     }
-#
 #     QTreeWidget::branch:has-children {
-#         padding-left: 8px; /* Additional padding for folder items */
+#         padding-left: -8px; /* Additional padding for folder items */
 #     }
 # """
 
