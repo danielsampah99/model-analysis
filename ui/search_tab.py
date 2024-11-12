@@ -103,22 +103,23 @@ class SearchTab(QWidget):
         self.single_id_menu = self.upload_dropdown_menu.addAction("Single ID")
         self.single_id_menu_icon = QIcon("./icons/use-single-id-icon.svg")
         self.single_id_menu.setIcon(self.single_id_menu_icon)
+        self.single_id_menu.triggered.connect(self.on_single_id_trigger)
 
 
 
 
-        upload_button = QPushButton(icon=raw_upload_button_icon, text="Upload Ids")
-        upload_button.setMinimumHeight(40)
-        upload_button.setMaximumWidth(200)
-        upload_button.setIconSize(QSize(20, 20))
-        upload_button.setStyleSheet("background-color: #3b82f6; padding: 8px 12px; color: white; font-weight: 600; border-radius: 6px; font-size: 14px; line-height: 20px; font-weight: 600;")
-
-        # Keyboard shortcut for the upload button.
-        upload_button_shortcut = QKeySequence("CTRL+U")
-        upload_button.setShortcut(upload_button_shortcut)
+        # upload_button = QPushButton(icon=raw_upload_button_icon, text="Upload Ids")
+        # upload_button.setMinimumHeight(40)
+        # upload_button.setMaximumWidth(200)
+        # upload_button.setIconSize(QSize(20, 20))
+        # upload_button.setStyleSheet("background-color: #3b82f6; padding: 8px 12px; color: white; font-weight: 600; border-radius: 6px; font-size: 14px; line-height: 20px; font-weight: 600;")
+        #
+        # # Keyboard shortcut for the upload button.
+        # upload_button_shortcut = QKeySequence("CTRL+U")
+        # upload_button.setShortcut(upload_button_shortcut)
 
         # Slot for the upload button
-        upload_button.clicked.connect(self.upload_ids_file_slot)
+        # upload_button.clicked.connect(self.upload_ids_file_slot)
 
         # Run Query button
         run_query_icon = QIcon("./icons/run_query_icon.svg")
@@ -154,7 +155,7 @@ class SearchTab(QWidget):
 
         self.upload_dropdown_button.setMenu(self.upload_dropdown_menu)
         button_layout.addWidget(self.upload_dropdown_button)
-        button_layout.addWidget(upload_button)
+        # button_layout.addWidget(upload_button)
         button_layout.addWidget(run_query_button)
         button_layout.addWidget(edit_button)
         button_layout.addWidget(refresh_button)
@@ -239,6 +240,15 @@ class SearchTab(QWidget):
 
         if form_dialog.exec() == QDialog.DialogCode.Accepted:
             print("Dialog submission was successful...")
+
+    @pyqtSlot()
+    def on_single_id_trigger(self) -> None:
+        """open the single id form dialog"""
+        from .single_id_upload import SingleIdDialog
+
+        form_dialog = SingleIdDialog(self)
+        if form_dialog.exec() == QDialog.DialogCode.Accepted:
+            pass
 
     @pyqtSlot(pd.DataFrame)
     def on_data_loaded(self, dataframe: pd.DataFrame) -> None:
