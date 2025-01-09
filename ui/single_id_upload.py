@@ -5,6 +5,8 @@ from PyQt6.QtWidgets import QWidget, QPushButton, QFormLayout, QLineEdit, QCombo
 from PyQt6.QtCore import QPropertyAnimation, pyqtSlot
 import pandas as pd
 
+from ui.file_explorer import FileExplorer
+
 label_styles = "font-size: 14px; line-height: 24px; font-weight: 500; color: #111827; "
 input_styles = "width: 100%; border-radius: 6px; border: 0.725 solid #d1d5db; padding: 6px 0; background-color: white; color: #111827; outline: 1px inset #D1D5DB; font-size: 14px; line-height: 1.5;"
 
@@ -85,8 +87,11 @@ form_styles = """
        """
 
 class SingleIdDialog(QDialog):
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, file_explorer: FileExplorer, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
+
+        self.parent_widget = parent
+        self.file_explorer = file_explorer
 
         self.submit_button = None
         # self.provider_id_input = None
@@ -189,15 +194,30 @@ class SingleIdDialog(QDialog):
         QMessageBox.critical(self, "Validation Error", error_message)
 
     def write_data_to_file(self) -> None:
+        print("\n=== Starting write_data_to_file ===")
         # create a file from the form's data
         destination_path = os.path.join(f"{os.getcwd()}", "providers", "raw-ids", f"{self.provider_name_input.text()}")
 
         # make the path if it doesn't exist
         os.makedirs(destination_path, exist_ok=True)
 
-        df=pd.DataFrame(data={ 'Blue Shield ID': [self.provider_id_input.text()], 'Model Name': [self.provider_name_input.text()], 'Model Line of Business': [self.model_lob_dropdown.currentText()] })
+        df=pd.DataFrame(data={ 'Blue Shield ID': [str(self.provider_id_input.text())], 'Model Name': [self.provider_name_input.text()], 'Model Line of Business': [self.model_lob_dropdown.currentText()] })
 
         output_file_path = os.path.join(destination_path, f"{self.provider_name_input.text().upper()}_{self.model_lob_dropdown.currentText().upper()}.csv")
 
         # save the file to the destination
         df.to_csv(output_file_path, index=False)
+
+        # Refresh the file explorer after creating the file.
+        print(f'trying to load: {output_file_path}')
+
+
+        if self.file_explorer:
+            print(f"File explorer instance found: {self.file_explorer}")
+            print("Emitting refresh_requested signal")
+            print('found the file explorer class')
+            self.file_explorer.refresh()
+        else:
+            print("No file explorer instance found!")
+
+        print("=== Finished write_data_to_file ===\n")

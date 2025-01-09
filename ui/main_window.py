@@ -1,15 +1,15 @@
 import os
 
-import pandas as pd
+
 from PyQt6.QtWidgets import (
     QWidget,
     QMainWindow,
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
-    QStackedLayout, QDockWidget,
+    QStackedLayout
 )
-from PyQt6.QtCore import Qt, pyqtSlot
+from PyQt6.QtCore import Qt
 
 from .file_explorer import FileExplorer
 from .team_a_page import TeamAPage
@@ -71,5 +71,3 @@ class MainWindow(QMainWindow):
     def on_file_selected(self, file_path: str):
         print(f"file being loaded: {file_path}")
         self.team_a_page.search_tab.on_load_sidebar_file_to_table(file_path)
-
-

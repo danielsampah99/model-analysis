@@ -1,11 +1,10 @@
 import os
-from os import PathLike
 from typing import Optional
 
 import pandas as pd
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QWidget, QTreeWidget, QVBoxLayout, QTreeWidgetItem, QDockWidget, QMessageBox
-from PyQt6.QtCore import Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtGui import QFileSystemModel
+from PyQt6.QtWidgets import QTreeView, QWidget, QVBoxLayout, QDockWidget, QMessageBox
+from PyQt6.QtCore import QModelIndex, Qt, pyqtSignal, pyqtSlot
 
 # file_explorer_stylesheet = """
 #     QTreeWidget {
@@ -69,98 +68,79 @@ class FileExplorer(QDockWidget):
     file_selected = pyqtSignal(str)
     data_loaded = pyqtSignal(pd.DataFrame)
 
+
     def __init__(self, directory: str,  parent=None):
         super().__init__(parent)
+
+        # widget to hold the layout.
+        self.content_widget = QWidget()
+
+        # setup the file system model.
+        self.model = QFileSystemModel()
+        self.model.setNameFilters(["*.csv"])
+        self.model.setNameFilterDisables(False)
+        self.model.setRootPath(directory)
+        self.base_directory = directory
+
+
+        # Set up the tree view.
+        self.tree_view = QTreeView()
+        self.tree_view.setAnimated(True)
+        self.tree_view.setModel(self.model)
+        self.tree_view.setRootIndex(self.model.index(directory))
+
+        # only show the file name column
+        self.tree_view.setHeaderHidden(True)
+        self.tree_view.hideColumn(1)  # Size
+        self.tree_view.hideColumn(2)  # Type
+        self.tree_view.hideColumn(3)  # Date Modified
+
+
+        # handle file selection
+        self.tree_view.clicked.connect(self._on_file_clicked)
+
 
         self.current_selected_file: Optional[str] = None
 
         self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea)
         self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetClosable | QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable)
 
-        # widget to hold the layout.
-        self.content_widget = QWidget()
+
+		# Create the layout without the parent.
 
 
-        self.tree_widget = QTreeWidget()
-        self.tree_widget.setHeaderLabel("Provider IDs")
-        self.tree_widget.setColumnCount(1)
-        self.tree_widget.itemClicked.connect(self.on_file_clicked) #type: ignore
-        self.tree_widget.setStyleSheet(file_explorer_stylesheet)
 
+        file_explorer_layout = QVBoxLayout()
+        file_explorer_layout.setContentsMargins(0, -50, 5, 20)
+        file_explorer_layout.addWidget(self.tree_view)
 
-        self.file_explorer_layout = QVBoxLayout(self.content_widget)
-        self.file_explorer_layout.addWidget(self.tree_widget)
-        self.file_explorer_layout.setContentsMargins(0, -50, 5, 20)
+        # set the layout to the content widget
+        self.content_widget.setLayout(file_explorer_layout)
         self.setWidget(self.content_widget)
 
-        # self.load_directory(directory)
-        self.load_raw_ids_directory(directory)
-
-    def load_raw_ids_directory(self, directory: str | PathLike[str]):
-        """ put the raw ids under the directory in the sidebar"""
-        try:
-            print(f"files directory: {directory}")
-            self.raw_ids_directory()
-            for root, directories, files in os.walk(directory):
-                for file in files:
-                    print(f"file: {file}")
-                    file_path = os.path.join(root, file)
-                    print(f"file Path: {file_path}")
-                    if os.path.isfile(file_path):
-                        self.add_raw_id_file(file, file_path)
-        except PermissionError:
-            QMessageBox.warning(self, "Permission Error", f"Permission denied accessing the directory {directory}")
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Something went wrong: {str(e)}")
-
-
-    def raw_ids_directory(self):
-        """widget for the raw ids directory"""
-        raw_id_dir = QTreeWidgetItem(self.tree_widget)
-
-        raw_id_dir_icon = QIcon("./icons/folder_icon.svg")
-        raw_id_dir.setIcon(0, raw_id_dir_icon)
-        raw_id_dir.setData(0, Qt.ItemDataRole.DisplayRole, "Raw IDs")
-        raw_id_dir.setFlags(Qt.ItemFlag.ItemIsEnabled)
-
-        self.tree_widget.addTopLevelItem(raw_id_dir)
-
-
-        # load files into the directory
-
-    def add_raw_id_file(self, file_name: str, file_path: str | PathLike[str]):
-        file_item = QTreeWidgetItem(self.tree_widget)
-        file_item.setText(0, file_name)
-        file_icon = QIcon("./icons/file_icon.svg")
-        file_item.setIcon(0, file_icon)
-
-        file_item.setData(0, Qt.ItemDataRole.UserRole, file_path)
-        self.tree_widget.addTopLevelItem(file_item)
-
-    @pyqtSlot(QTreeWidgetItem)
-    def on_file_clicked(self, item: QTreeWidgetItem) -> None:
-
-
-        if item.text(0) == "Raw IDs":
-            print("folder clicked!")  # Debug print
-
-            # item.setExpanded(not item.isExpanded())
+        print(f"Directory being loaded: {directory}")
+        print(f"Files in directory: {os.listdir(directory)}")
 
 
 
-        file_path = item.data(0, Qt.ItemDataRole.UserRole)
-        if file_path and os.path.isfile(file_path):
+    @pyqtSlot(QModelIndex)
+    def _on_file_clicked(self, index):
+        file_path = self.model.filePath(index)
+        if os.path.isfile(file_path):
             try:
-                print("file clicked!")  # Debug print
                 file_data = pd.read_csv(file_path)
-                self.current_selected_file = file_path
-
-                self.file_selected.emit(file_path) #type: ignore
-                print(f"file select signal emitted: {file_path}")  # Debug print
-                print(f"file select signal emitted: {self.file_selected}")  # Debug print
-
-                self.data_loaded.emit(file_data) #type: ignore
-
+                self.file_selected.emit(file_path)
+                self.data_loaded.emit(file_data)
             except Exception as e:
-                QMessageBox.warning(self, "Error", f"Something went wrong: {str(e)}")
+                QMessageBox.warning(self, "Error", f"Failed to load file: {str(e)}")
 
+
+    def refresh(self):
+        """Refresh the file system view"""
+        # Force the model to refresh its data
+        current_index = self.tree_view.currentIndex()
+        self.model.setRootPath("")  # Reset root path
+        self.model.setRootPath(self.base_directory)  # Set it back
+        self.tree_view.setRootIndex(self.model.index(self.base_directory))
+        if current_index.isValid():
+                    self.tree_view.setCurrentIndex(current_index)

@@ -3,7 +3,7 @@ import subprocess
 import platform
 from typing import Optional
 
-from PyQt6.QtGui import QIcon, QKeySequence
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -16,6 +16,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import pyqtSlot, QSize
 import os
 import pandas as pd
+
+from ui.file_explorer import FileExplorer
 
 from .blue_shield_id_model import BlueShieldIdModel
 from .upload_form_dialog import UploadFormDialog
@@ -67,6 +69,7 @@ class SearchTab(QWidget):
         super().__init__(parent)
 
         self.form_dialog = UploadFormDialog(self)
+        self.file_explorer = FileExplorer(directory=os.path.join(os.getcwd(), 'providers', 'raw-ids'))
 
         self.current_df = None  # the current dataframe that is displayed in the tree view
         self.current_file_path: Optional[str] = None
@@ -246,7 +249,7 @@ class SearchTab(QWidget):
         """open the single id form dialog"""
         from .single_id_upload import SingleIdDialog
 
-        form_dialog = SingleIdDialog(self)
+        form_dialog = SingleIdDialog(file_explorer=self.file_explorer, parent=self)
         if form_dialog.exec() == QDialog.DialogCode.Accepted:
             pass
 
