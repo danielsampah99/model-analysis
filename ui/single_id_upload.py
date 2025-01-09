@@ -1,11 +1,8 @@
 # Single id upload
 import os
 from typing import Optional
-
-from PyQt6.QtGui import QPainter, QColor, QPaintEvent
-from PyQt6.QtWidgets import QWidget, QPushButton, QVBoxLayout, QFormLayout, QLineEdit, QComboBox, QLabel, QMessageBox, \
-    QDialog
-from PyQt6.QtCore import Qt, QPropertyAnimation, pyqtSlot
+from PyQt6.QtWidgets import QWidget, QPushButton, QFormLayout, QLineEdit, QComboBox, QLabel, QMessageBox, QDialog
+from PyQt6.QtCore import QPropertyAnimation, pyqtSlot
 import pandas as pd
 
 label_styles = "font-size: 14px; line-height: 24px; font-weight: 500; color: #111827; "
@@ -31,31 +28,60 @@ input_styles = "width: 100%; border-radius: 6px; border: 0.725 solid #d1d5db; pa
 
 # Style everything
 form_styles = """
-            background-color: white;
-           #contentPanel {
-               background-color: white;
-               border-radius: 8px;
-               min-width: 320px;
-               max-width: 380px;
-           } 
-            #dialogButton {
-               background-color: #4F46E5;  /* indigo-600 */
-               color: white;
-               border: none;
-               border-radius: 6px;
-               padding: 8px 16px;
-               font-size: 14px;
-               font-weight: bold;
-               width: 100%;
-           }
+        #contentPanel {
+            padding: 24px;
+        }
+        QLabel {
+            font-size: 14px;
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+        QLineEdit {
+            padding: 8px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+        }
+        QLineEdit:focus {
+            border: 2px solid #4F46E5;
+            outline: none;
+        }
+        QDialog {
+       		background-color: white;
+           	border: 1px solid #E5E7EB;
+            border-radius: 8px;
+        }
+        #dialogButton {
+            background-color: #4F46E5;  /* indigo-600 */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            width: 100%;
+        }
+        QComboBox {
 
-           #dialogButton:hover {
-               background-color: #4338CA;  /* indigo-700 */
-           }
-
-           #dialogButton:pressed {
-               background-color: #3730A3;  /* indigo-800 */
-           }
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+        }
+        QComboBox:hover {
+            border-color: #9CA3AF;
+        }
+        QComboBox:focus {
+            border: 2px solid #4F46E5;
+        }
+        #dialogButton:hover {
+            background-color: #4338CA;  /* indigo-700 */
+        }
+        #dialogButton:pressed {
+            background-color: #3730A3;  /* indigo-800 */
+        }
        """
 
 class SingleIdDialog(QDialog):
@@ -63,11 +89,11 @@ class SingleIdDialog(QDialog):
         super().__init__(parent)
 
         self.submit_button = None
-        self.provider_id_input = None
-        self.provider_name_input = None
+        # self.provider_id_input = None
+        # self.provider_name_input = None
         self.provider_name_label = None
-        self.model_lob_dropdown = None
-        self.model_lob_options = None
+        # self.model_lob_dropdown = None
+        self.model_lob_options = [""]
         self.model_lob_label = None
 
         self.content = QWidget(self)
@@ -92,6 +118,7 @@ class SingleIdDialog(QDialog):
         self.provider_name_input = QLineEdit(self)
         self.provider_name_input.setStyleSheet(input_styles)
         self.provider_name_input.setPlaceholderText("Model provider's name...")
+        self.provider_name_input.setToolTip("Enter the full name of the new provider")
 
 
         #  Model Line Of Business dropdown
@@ -99,10 +126,12 @@ class SingleIdDialog(QDialog):
         self.model_lob_dropdown = QComboBox(self)
         self.model_lob_dropdown.setStyleSheet(f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}")
         self.model_lob_dropdown.setPlaceholderText("Line of business...")
+        self.model_lob_dropdown.setToolTip("Select the line of business for this provider")
 
         self.model_lob_label = QLabel("Model Line Of Business")
         self.model_lob_label.setStyleSheet(label_styles)
         self.model_lob_dropdown.addItems(self.model_lob_options)
+        self.model_lob_dropdown.setCurrentText(self.model_lob_options[0])
 
 
         provider_id_label = QLabel(self)
@@ -110,7 +139,11 @@ class SingleIdDialog(QDialog):
         provider_id_label.setText("Model Provider's Id")
 
         self.provider_id_input = QLineEdit(self)
+        self.provider_id_input.setPlaceholderText("Model provider's id")
         self.provider_id_input.setStyleSheet(input_styles)
+        self.provider_id_input.setToolTip("Enter the provider's unique identifier")
+
+
         # submit button
         # Button
         self.submit_button = QPushButton("Submit")
@@ -162,13 +195,9 @@ class SingleIdDialog(QDialog):
         # make the path if it doesn't exist
         os.makedirs(destination_path, exist_ok=True)
 
-        df = pd.DataFrame()
-        df.insert(0, 'Blue Shield ID', self.provider_name_input.text())
-        df.insert(1, 'Model Name', self.model_lob_dropdown.currentText())
-        df.insert(0, 'Model Line of Business', self.provider_id_input.text())
+        df=pd.DataFrame(data={ 'Blue Shield ID': [self.provider_id_input.text()], 'Model Name': [self.provider_name_input.text()], 'Model Line of Business': [self.model_lob_dropdown.currentText()] })
 
         output_file_path = os.path.join(destination_path, f"{self.provider_name_input.text().upper()}_{self.model_lob_dropdown.currentText().upper()}.csv")
 
         # save the file to the destination
         df.to_csv(output_file_path, index=False)
-

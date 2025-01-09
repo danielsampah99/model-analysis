@@ -20,8 +20,11 @@ desktop.ini
 # PyCharm
 .idea/
 
-# VSCode
+# IDE
 .vscode/
+.ropeproject
+.ruff_cache/
+
 
 # user generated files.
 providers/
