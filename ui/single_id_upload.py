@@ -201,7 +201,7 @@ class SingleIdDialog(QDialog):
         # make the path if it doesn't exist
         os.makedirs(destination_path, exist_ok=True)
 
-        df=pd.DataFrame(data={ 'Blue Shield ID': [str(self.provider_id_input.text())], 'Model Name': [self.provider_name_input.text()], 'Model Line of Business': [self.model_lob_dropdown.currentText()] })
+        df=pd.DataFrame(data={ 'BS_ID': [str(self.provider_id_input.text())], 'Model Name': [self.provider_name_input.text()], 'Model Line of Business': [self.model_lob_dropdown.currentText()] })
 
         output_file_path = os.path.join(destination_path, f"{self.provider_name_input.text().upper()}_{self.model_lob_dropdown.currentText().upper()}.csv")
 

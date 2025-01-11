@@ -3,7 +3,7 @@ import subprocess
 import platform
 from typing import Optional
 
-from PyQt6.QtGui import QIcon
+from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
     QWidget,
     QVBoxLayout,
@@ -27,21 +27,21 @@ base_directory = os.getcwd()
 
 dropdown_button_styles = """
             QPushButton {
-                background-color: white;
-                border: 1px solid #D1D5DB;
+                background-color: #1f2937;
+                border: 1px solid #111827;
                 border-radius: 6px;
                 padding: 8px 12px;
                 font-size: 14px;
                 font-weight: 600;
                 line-height: 20px;
-                color: #111827;
+                color: #f9fafb;
                 text-align: left;
             }
             QPushButton:hover {
-                background-color: #F9FAFB;
+                background-color: #4b5563;
             }
             QPushButton:pressed {
-                background-color: #F3F4F6;
+                background-color: #374151
             }
         """
 
@@ -52,6 +52,7 @@ dropdown_menu_styles = """
                 border-radius: 6px;
                 padding: 4px 4px;
                 margin-top: 4px;
+                width: 100px;
             }
             QMenu::item {
                 padding: 8px 32px 8px 8px;
@@ -65,7 +66,7 @@ dropdown_menu_styles = """
         """
 
 class SearchTab(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
 
         self.form_dialog = UploadFormDialog(self)
@@ -83,30 +84,31 @@ class SearchTab(QWidget):
         self.form_dialog.setStyleSheet("background-color: #f8fafc; padding: 20px 16px 16px; border-radius: 6px;")
 
         # styling the upload button
-        raw_upload_button_icon = QIcon("./icons/upload_ids_icon")
+        raw_upload_button_icon = QIcon("./icons/use-single-id-icon.svg")
 
         #  CREATING THE UPLOAD DROPDOWN.
         # trigger
-        self.upload_dropdown_button = QPushButton(text="Upload IDs")
-        self.upload_dropdown_button.setStyleSheet(dropdown_button_styles)
-        self.upload_dropdown_button.setIcon(raw_upload_button_icon)
-        self.upload_dropdown_button.setIconSize(QSize(20, 20))
+        self.single_id_button = QPushButton(text="Upload Single ID")
+        self.single_id_button.setStyleSheet(dropdown_button_styles)
+        self.single_id_button.setIcon(raw_upload_button_icon)
+        self.single_id_button.setIconSize(QSize(20, 20))
+        self.single_id_button.clicked.connect(self.on_single_id_trigger)
 
-        # menu
-        self.upload_dropdown_menu = QMenu(self)
-        self.upload_dropdown_menu.setStyleSheet(dropdown_menu_styles)
+        # # menu
+        # self.upload_dropdown_menu = QMenu(self)
+        # self.upload_dropdown_menu.setStyleSheet(dropdown_menu_styles)
 
-        #  template menu action
-        self.useTemplateMenu = self.upload_dropdown_menu.addAction("Use Template")
-        self.useTemplateMenuIcon = QIcon("./icons/use-template-icon.svg")
-        self.useTemplateMenu.setIcon(self.useTemplateMenuIcon)
-        self.useTemplateMenu.triggered.connect(self.upload_ids_file_slot)
+        # #  template menu action
+        # self.useTemplateMenu = self.upload_dropdown_menu.addAction("Use Template")
+        # self.useTemplateMenuIcon = QIcon("./icons/use-template-icon.svg")
+        # self.useTemplateMenu.setIcon(self.useTemplateMenuIcon)
+        # self.useTemplateMenu.triggered.connect(self.upload_ids_file_slot)
 
-        # single id menu action
-        self.single_id_menu = self.upload_dropdown_menu.addAction("Single ID")
-        self.single_id_menu_icon = QIcon("./icons/use-single-id-icon.svg")
-        self.single_id_menu.setIcon(self.single_id_menu_icon)
-        self.single_id_menu.triggered.connect(self.on_single_id_trigger)
+        # # single id menu action
+        # self.single_id_menu = self.upload_dropdown_menu.addAction("Single ID")
+        # self.single_id_menu_icon = QIcon("./icons/use-single-id-icon.svg")
+        # self.single_id_menu.setIcon(self.single_id_menu_icon)
+        # self.single_id_menu.triggered.connect(self.on_single_id_trigger)
 
 
 
@@ -135,15 +137,15 @@ class SearchTab(QWidget):
         # run query button slot
         run_query_button.clicked.connect(self.run_query_slot)  # TODO: This button will instead connect to the slot that does the main query
 
-        # EDIT BUTTON
-        edit_icon = QIcon("./icons/edit_file_icon.svg")
-        edit_button = QPushButton(icon=edit_icon, text="Edit")
-        edit_button.setMinimumWidth(20)
-        edit_button.setMaximumWidth(200)
-        edit_button.setIconSize(QSize(20, 20))
-        edit_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+        # # EDIT BUTTON
+        # edit_icon = QIcon("./icons/edit_file_icon.svg")
+        # edit_button = QPushButton(icon=edit_icon, text="Edit")
+        # edit_button.setMinimumWidth(20)
+        # edit_button.setMaximumWidth(200)
+        # edit_button.setIconSize(QSize(20, 20))
+        # edit_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
 
-        edit_button.clicked.connect(self.on_edit_click)
+        # edit_button.clicked.connect(self.on_edit_click)
 
 
         # REFRESH BUTTON
@@ -156,12 +158,58 @@ class SearchTab(QWidget):
 
         refresh_button.clicked.connect(self.on_refresh_click)
 
-        self.upload_dropdown_button.setMenu(self.upload_dropdown_menu)
-        button_layout.addWidget(self.upload_dropdown_button)
+
+        # Creating the actions dropdown menu
+        # trigger
+        self.actions_button = QPushButton(self)
+        self.actions_button.setText("Actions")
+        self.actions_button.setToolTip("Click here to find more actions")
+        self.actions_button.setShortcut("Ctrl+A")
+        self.actions_button.setMinimumWidth(20)
+        self.actions_button.setMaximumWidth(200)
+        self.actions_button.setIcon(QIcon("./icons/more_icon.svg"))
+        self.actions_button.setIconSize(QSize(20, 20))
+        self.actions_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+
+		# dropdown
+        self.actions_dropdown_menu = QMenu(self)
+        self.actions_dropdown_menu.setMinimumWidth(self.actions_button.width())
+        self.actions_dropdown_menu.setStyleSheet(dropdown_menu_styles)
+
+        print(f"button width: {self.actions_button.width()}")
+
+        # dropdown actions
+        self.edit_button = QAction("Edit", self)
+        self.actions_dropdown_menu.addAction(self.edit_button)
+        self.edit_button.setIcon(QIcon("./icons/edit_file_icon.svg"))
+        self.edit_button.triggered.connect(self.on_save_query)
+        self.edit_button.triggered.connect(self.on_edit_click)
+
+        self.save_button = QAction("Save", self)
+        self.actions_dropdown_menu.addAction(self.save_button)
+        self.save_button.setIcon(QIcon("./icons/save_icon.svg"))
+        self.save_button.triggered.connect(self.on_save_query)
+
+        self.delete_button = QAction("Delete", self)
+        self.actions_dropdown_menu.addAction(self.delete_button)
+        self.delete_button.setIcon(QIcon("./icons/trash_icon.svg"))
+        self.delete_button.triggered.connect(self.on_delete_file)
+
+
+
+        # connecting the dropdown to the trigger
+        self.actions_button.setMenu(self.actions_dropdown_menu)
+
+        # self.upload_dropdown_button.setMenu(self.upload_dropdown_menu)
+        button_layout.addWidget(self.single_id_button)
+
+
         # button_layout.addWidget(upload_button)
         button_layout.addWidget(run_query_button)
-        button_layout.addWidget(edit_button)
+        # button_layout.addWidget(edit_button)
         button_layout.addWidget(refresh_button)
+        button_layout.addWidget(self.actions_button)
+
 
         heading_text = QLabel("WELCOME...")
         heading_text.setStyleSheet("font-size: 30px; margin: 10px 0px; line-height: 28px; font-weight: bold; color: #0f172a; ")
@@ -181,6 +229,7 @@ class SearchTab(QWidget):
 
         self.load_template_data()
 
+
     def load_template_data(self) -> None:
         """Load the template data into the table view."""
         try:
@@ -191,6 +240,7 @@ class SearchTab(QWidget):
             self.update_table_model(dataframe)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load template file: {str(e)}")
+
 
     def update_table_model(self, dataframe: pd.DataFrame) -> None:
         """Update the table view with new data."""
@@ -212,6 +262,20 @@ class SearchTab(QWidget):
 
         except Exception as e:
             print(f"Error in updating table model: {e}")
+
+
+    @pyqtSlot()
+    def on_save_query(self) -> None:
+        """Save the results of the query to the file system"""
+        print(f"File to saved to the file system under the following name {self.current_file_path}")
+
+
+
+    @pyqtSlot()
+    def on_delete_file(self) -> None:
+        """Save the results of the query to the file system"""
+        print(f"File to saved to the file system under the following name {self.current_file_path}")
+
 
     @pyqtSlot()
     def download_template_slot(self) -> None:
@@ -235,6 +299,7 @@ class SearchTab(QWidget):
                 "File was unable to download. Please try again.",
             )
 
+
     @pyqtSlot()
     def upload_ids_file_slot(self) -> None:
         """Open the form dialog to upload IDs file."""
@@ -243,6 +308,7 @@ class SearchTab(QWidget):
 
         if form_dialog.exec() == QDialog.DialogCode.Accepted:
             print("Dialog submission was successful...")
+
 
     @pyqtSlot()
     def on_single_id_trigger(self) -> None:
@@ -253,10 +319,12 @@ class SearchTab(QWidget):
         if form_dialog.exec() == QDialog.DialogCode.Accepted:
             pass
 
+
     @pyqtSlot(pd.DataFrame)
     def on_data_loaded(self, dataframe: pd.DataFrame) -> None:
         """Handle the loaded data from the UploadFormDialog."""
         self.update_table_model(dataframe)
+
 
     @pyqtSlot()
     def run_query_slot(self) -> None:
