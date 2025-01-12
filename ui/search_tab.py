@@ -193,7 +193,7 @@ class SearchTab(QWidget):
         self.delete_button = QAction("Delete", self)
         self.actions_dropdown_menu.addAction(self.delete_button)
         self.delete_button.setIcon(QIcon("./icons/trash_icon.svg"))
-        # self.delete_button.triggered.connect(self.on_delete_file)
+        self.delete_button.triggered.connect(self.on_delete_file)
 
 
 
@@ -415,29 +415,15 @@ class SearchTab(QWidget):
             )
 
 
-    # @pyqtSlot()
-    # def on_delete_file(self) -> None:
-    #     """delete the file from the file system"""
-    #     if not self.current_file_path:
-    #         QMessageBox.warning(self, "No File Selected", "Please select a file to delete.")
-    #         return
+    @pyqtSlot()
+    def on_delete_file(self) -> None:
+        """delete the file from the file system"""
+        file_to_delete = self.current_file_path.replace("RAW_ID", "PROFILE")
+        if not os.path.exists(file_to_delete):
+	        QMessageBox.critical(self, "Error", "Failed to a non profile file")
 
-    #     try:
-    #     	# get the folder name and check if the file exists.
-	   #      folder_name = os.path.dirname(self.current_file_path)
-
-    #         # number_of_files = len([file for file in os.listdir(folder_name) if os.path.isfile(self.current_file_path) ])
-
-    #          # Confirm deletion with user
-    #         msg = QMessageBox()
-    #         msg.setIcon(QMessageBox.Icon.Warning)
-    #         msg.setText("Are you sure you want to delete this file?")
-    #         msg.setInformativeText(f"File: {os.path.basename(self.current_file_path)}")
-    #         msg.setWindowTitle("Confirm Delete")
-    #         msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-
-    #     except Exception as e:
-    #         QMessageBox.critical(self, "Error", f"Failed to delete file: {str(e)}")
+        else:
+        	os.remove(file_to_delete)
 
 
 
