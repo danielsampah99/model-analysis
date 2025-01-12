@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from PyQt6.QtGui import QIcon, QColor
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QComboBox,
     QPushButton,
@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QDialog,
     QFormLayout,
     QLabel,
-    QLineEdit, QGraphicsDropShadowEffect,
+    QLineEdit
 )
 from PyQt6.QtCore import pyqtSignal, QSize, pyqtSlot, Qt
 
@@ -21,17 +21,17 @@ base_directory = os.getcwd()
 
 upload_form_styles = """
     QDialog {
-        border: 2px solid #3498db;  
-        border-radius: 8px;         
-        background-color: white;  
-        border-radius: 6px; 
-        padding: 8px 12px; 
-        color: #111827; 
-        border: 0.725 solid #d1d5db; 
-        background-color: white; 
-        font-size: 14px; 
-        line-height: 20px; 
-        font-weight: 600; 
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        background-color: white;
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: #111827;
+        border: 0.725 solid #d1d5db;
+        background-color: white;
+        font-size: 14px;
+        line-height: 20px;
+        font-weight: 600;
     }
 """
 
@@ -51,7 +51,7 @@ class UploadFormDialog(QDialog):
         self.setWindowFlags(Qt.WindowType.Dialog)
 
         self.blue_shield_id_data = pd.DataFrame()
-        self.selected_file: Optional[str] = None
+        self.selected_file: Optional[str] = ""
 
         self.model_lob_options: list[str] = ["Commercial", "SHP", "Medicaid"]
 
@@ -107,7 +107,7 @@ class UploadFormDialog(QDialog):
 
         # Completing the form's layout
         self.setLayout(form_layout)
-        self.selected_file = None
+        self.selected_file = ""
 
         # download the template file.
 
@@ -185,7 +185,7 @@ class UploadFormDialog(QDialog):
         try:
             if file_path.endswith(".csv"):
                 dataframe = pd.read_csv(file_path)
-            elif file_path.endswith(".xlsx", ".xls"):
+            elif file_path.endswith(".xlsx"):
                 dataframe = pd.read_excel(file_path)
             else:
                 raise ValueError("Unsupported file type")

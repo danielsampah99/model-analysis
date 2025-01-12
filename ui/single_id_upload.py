@@ -203,7 +203,7 @@ class SingleIdDialog(QDialog):
 
         df=pd.DataFrame(data={ 'BS_ID': [str(self.provider_id_input.text())], 'Model Name': [self.provider_name_input.text()], 'Model Line of Business': [self.model_lob_dropdown.currentText()] })
 
-        output_file_path = os.path.join(destination_path, f"{self.provider_name_input.text().upper()}_{self.model_lob_dropdown.currentText().upper()}.csv")
+        output_file_path = os.path.join(destination_path, f"{self.provider_name_input.text().upper()}_{self.model_lob_dropdown.currentText().upper()}-RAW_ID.csv")
 
         # save the file to the destination
         df.to_csv(output_file_path, index=False)

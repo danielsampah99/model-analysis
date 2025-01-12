@@ -52,7 +52,7 @@ dropdown_menu_styles = """
                 border-radius: 6px;
                 padding: 4px 4px;
                 margin-top: 4px;
-                width: 100px;
+                width: 107px;
             }
             QMenu::item {
                 padding: 8px 32px 8px 8px;
@@ -193,7 +193,7 @@ class SearchTab(QWidget):
         self.delete_button = QAction("Delete", self)
         self.actions_dropdown_menu.addAction(self.delete_button)
         self.delete_button.setIcon(QIcon("./icons/trash_icon.svg"))
-        self.delete_button.triggered.connect(self.on_delete_file)
+        # self.delete_button.triggered.connect(self.on_delete_file)
 
 
 
@@ -267,14 +267,18 @@ class SearchTab(QWidget):
     @pyqtSlot()
     def on_save_query(self) -> None:
         """Save the results of the query to the file system"""
+        # folder = os.path.dirname(self.current_file_path)
+        # filename = os.path.basename(self.current_file_path)
+
+        profile_file_name = self.current_file_path.replace("RAW_ID", "PROFILE")
+        self.current_df.to_csv(f"{profile_file_name}", index=False)
+
+        QMessageBox.information(self, "Save Successful", f"File saved successfully as {profile_file_name}")
+
         print(f"File to saved to the file system under the following name {self.current_file_path}")
 
 
 
-    @pyqtSlot()
-    def on_delete_file(self) -> None:
-        """Save the results of the query to the file system"""
-        print(f"File to saved to the file system under the following name {self.current_file_path}")
 
 
     @pyqtSlot()
@@ -409,6 +413,34 @@ class SearchTab(QWidget):
             QMessageBox.critical(
                 self, "Error", f"Failed to process the query, {str(e)}"
             )
+
+
+    # @pyqtSlot()
+    # def on_delete_file(self) -> None:
+    #     """delete the file from the file system"""
+    #     if not self.current_file_path:
+    #         QMessageBox.warning(self, "No File Selected", "Please select a file to delete.")
+    #         return
+
+    #     try:
+    #     	# get the folder name and check if the file exists.
+	   #      folder_name = os.path.dirname(self.current_file_path)
+
+    #         # number_of_files = len([file for file in os.listdir(folder_name) if os.path.isfile(self.current_file_path) ])
+
+    #          # Confirm deletion with user
+    #         msg = QMessageBox()
+    #         msg.setIcon(QMessageBox.Icon.Warning)
+    #         msg.setText("Are you sure you want to delete this file?")
+    #         msg.setInformativeText(f"File: {os.path.basename(self.current_file_path)}")
+    #         msg.setWindowTitle("Confirm Delete")
+    #         msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+    #     except Exception as e:
+    #         QMessageBox.critical(self, "Error", f"Failed to delete file: {str(e)}")
+
+
+
 
     def on_edit_click(self) -> None:
         file_to_open = self.form_dialog.saved_file_path
