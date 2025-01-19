@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QPushButton, QStackedLayout, QVBoxLayout, QWidget
@@ -16,10 +17,13 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800, 800)
 
         # getting the directory
-        base_directory = os.path.join(os.getcwd(), "providers", "raw-ids")
+        self.base_directory = os.path.join(os.getcwd(), "providers", "raw-ids")
+
+        # create the folders
+        self.create_starting_folders()
 
         # sidebar
-        self.file_explorer = FileExplorer(base_directory)
+        self.file_explorer = FileExplorer(self.base_directory)
         self.file_explorer.file_selected.connect(self.on_file_selected)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.file_explorer)
 
@@ -59,3 +63,12 @@ class MainWindow(QMainWindow):
     def on_file_selected(self, file_path: str):
         print(f"file being loaded: {file_path}")
         self.team_a_page.search_tab.on_load_sidebar_file_to_table(file_path)
+
+    def create_starting_folders(self):
+        """create the folders by which the whole application will organize models into years"""
+        number_of_years = 10
+        current_year = datetime.now().year
+
+        for i in range(number_of_years):
+            year_path = os.path.join(self.base_directory, str(current_year + i))
+            os.makedirs(name=year_path, exist_ok=True)

@@ -3,30 +3,13 @@ import os
 from typing import Optional
 
 import pandas as pd
-from PyQt6.QtCore import QPropertyAnimation, pyqtSlot
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QComboBox, QDialog, QFormLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QWidget
 
 from ui.file_explorer import FileExplorer
 
 label_styles = "font-size: 14px; line-height: 24px; font-weight: 500; color: #111827; "
 input_styles = "width: 100%; border-radius: 6px; border: 0.725 solid #d1d5db; padding: 6px 0; background-color: white; color: #111827; outline: 1px inset #D1D5DB; font-size: 14px; line-height: 1.5;"
-
-
-# class DialogBackdrop(QWidget):
-#     def __init__(self,  parent: Optional[QWidget] = None) -> None:
-#         super().__init__(parent)
-#
-#         self.setAutoFillBackground(True)
-#         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-#         self.opacity: float = 0
-#
-#     def paintEvent(self, event: QPaintEvent):
-#         painter = QPainter(self)
-#         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-#
-#         # Creating the semi transparent backdrop
-#         color = QColor(107, 114, 128, int(self.opacity * 190))  # gray-500 with opacity
-#         painter.fillRect(self.rect(), color)
 
 
 # Style everything
@@ -87,6 +70,8 @@ form_styles = """
         }
        """
 
+dropdown_styles = f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}"
+
 
 class SingleIdDialog(QDialog):
     def __init__(self, file_explorer: FileExplorer, parent: Optional[QWidget] = None) -> None:
@@ -101,12 +86,11 @@ class SingleIdDialog(QDialog):
         self.provider_name_label = None
         # self.model_lob_dropdown = None
         self.model_lob_options = [""]
+        self.model_type_options = ["Facility", "Professional", "Behavorial Health", "Surgery Centre", "Anesthesia"]
         self.model_lob_label = None
 
         self.content = QWidget(self)
         self.submit_button: Optional[QPushButton] = None
-        self.backdrop_animation: QPropertyAnimation
-        self.content_animation: QPropertyAnimation
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -126,9 +110,7 @@ class SingleIdDialog(QDialog):
         #  Model Line Of Business dropdown
         self.model_lob_options: list[str] = ["Commercial", "SHP", "Medicaid"]
         self.model_lob_dropdown = QComboBox(self)
-        self.model_lob_dropdown.setStyleSheet(
-            f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}"
-        )
+        self.model_lob_dropdown.setStyleSheet(dropdown_styles)
         self.model_lob_dropdown.setPlaceholderText("Line of business...")
         self.model_lob_dropdown.setToolTip("Select the line of business for this provider")
 
@@ -146,6 +128,15 @@ class SingleIdDialog(QDialog):
         self.provider_id_input.setStyleSheet(input_styles)
         self.provider_id_input.setToolTip("Enter the provider's unique identifier")
 
+        # Model type dropdown
+        self.model_type_label = QLabel(text="Type of Model Provider", parent=self)
+        self.model_type_label.setStyleSheet(label_styles)
+
+        self.model_type_dropdown = QComboBox(self)
+        self.model_type_dropdown.setStyleSheet(dropdown_styles)
+        self.model_type_dropdown.addItems(self.model_type_options)
+        self.model_type_dropdown.setToolTip("Select the type of model provider")
+
         # submit button
         # Button
         self.submit_button = QPushButton("Submit")
@@ -158,8 +149,9 @@ class SingleIdDialog(QDialog):
         # add widgets to the form's layout
         form_layout.setSpacing(20)
         form_layout.addRow(self.provider_name_label, self.provider_name_input)
-        form_layout.addRow(self.model_lob_label, self.model_lob_dropdown)
         form_layout.addRow(provider_id_label, self.provider_id_input)
+        form_layout.addRow(self.model_lob_label, self.model_lob_dropdown)
+        form_layout.addRow(self.model_type_label, self.model_type_dropdown)
         form_layout.addRow(self.submit_button)
 
         self.setLayout(form_layout)
