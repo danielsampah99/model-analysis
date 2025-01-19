@@ -23,3 +23,9 @@ class Utils:
         """
 
         return datetime.datetime.now().year
+
+    def format_model_type_name(self, model_type: str) -> str:
+        """Format the value of the model type by capitalizing it and replacing the spaces with underscores"""
+        if model_type is None:
+            return ""
+        return model_type.upper().replace(" ", "_")
