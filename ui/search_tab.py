@@ -1,27 +1,30 @@
+import os
+import platform
 import shutil
 import subprocess
-import platform
 from typing import Optional
 
+import pandas as pd
+from PyQt6.QtCore import QSize, pyqtSlot
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtWidgets import (
-    QWidget,
-    QVBoxLayout,
+    QDialog,
     QHBoxLayout,
-    QPushButton,
-    QTableView,
+    QLabel,
+    QMenu,
     QMessageBox,
-    QDialog, QLabel, QSpacerItem, QSizePolicy, QMenu,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt6.QtCore import pyqtSlot, QSize
-import os
-import pandas as pd
 
 from ui.file_explorer import FileExplorer
 
 from .blue_shield_id_model import BlueShieldIdModel
 from .upload_form_dialog import UploadFormDialog
-
 
 base_directory = os.getcwd()
 
@@ -65,15 +68,16 @@ dropdown_menu_styles = """
             }
         """
 
+
 class SearchTab(QWidget):
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
 
         self.form_dialog = UploadFormDialog(self)
-        self.file_explorer = FileExplorer(directory=os.path.join(os.getcwd(), 'providers', 'raw-ids'))
+        self.file_explorer = FileExplorer(directory=os.path.join(os.getcwd(), "providers", "raw-ids"))
 
-        self.current_df = None  # the current dataframe that is displayed in the tree view
-        self.current_file_path: Optional[str] = None
+        self.current_df: pd.DataFrame = pd.DataFrame()  # the current dataframe that is displayed in the tree view
+        self.current_file_path: str = ""
         self._init_ui()
 
     def _init_ui(self):
@@ -110,9 +114,6 @@ class SearchTab(QWidget):
         # self.single_id_menu.setIcon(self.single_id_menu_icon)
         # self.single_id_menu.triggered.connect(self.on_single_id_trigger)
 
-
-
-
         # upload_button = QPushButton(icon=raw_upload_button_icon, text="Upload Ids")
         # upload_button.setMinimumHeight(40)
         # upload_button.setMaximumWidth(200)
@@ -132,7 +133,9 @@ class SearchTab(QWidget):
         run_query_button.setMinimumWidth(20)
         run_query_button.setMaximumWidth(200)
         run_query_button.setIconSize(QSize(20, 20))
-        run_query_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+        run_query_button.setStyleSheet(
+            "border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;"
+        )
 
         # run query button slot
         run_query_button.clicked.connect(self.run_query_slot)  # TODO: This button will instead connect to the slot that does the main query
@@ -147,17 +150,17 @@ class SearchTab(QWidget):
 
         # edit_button.clicked.connect(self.on_edit_click)
 
-
         # REFRESH BUTTON
         refresh_icon = QIcon("./icons/refresh_file_icon.svg")
         refresh_button = QPushButton(icon=refresh_icon, text="Refresh")
         refresh_button.setMinimumWidth(20)
         refresh_button.setMaximumWidth(200)
         refresh_button.setIconSize(QSize(20, 20))
-        refresh_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+        refresh_button.setStyleSheet(
+            "border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;"
+        )
 
         refresh_button.clicked.connect(self.on_refresh_click)
-
 
         # Creating the actions dropdown menu
         # trigger
@@ -169,9 +172,11 @@ class SearchTab(QWidget):
         self.actions_button.setMaximumWidth(200)
         self.actions_button.setIcon(QIcon("./icons/more_icon.svg"))
         self.actions_button.setIconSize(QSize(20, 20))
-        self.actions_button.setStyleSheet("border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;")
+        self.actions_button.setStyleSheet(
+            "border-radius: 6px; padding: 8px 12px; color: #111827; border: 0.725 solid #d1d5db; background-color: white; font-size: 14px; line-height: 20px; font-weight: 600;"
+        )
 
-		# dropdown
+        # dropdown
         self.actions_dropdown_menu = QMenu(self)
         self.actions_dropdown_menu.setMinimumWidth(self.actions_button.width())
         self.actions_dropdown_menu.setStyleSheet(dropdown_menu_styles)
@@ -195,14 +200,11 @@ class SearchTab(QWidget):
         self.delete_button.setIcon(QIcon("./icons/trash_icon.svg"))
         self.delete_button.triggered.connect(self.on_delete_file)
 
-
-
         # connecting the dropdown to the trigger
         self.actions_button.setMenu(self.actions_dropdown_menu)
 
         # self.upload_dropdown_button.setMenu(self.upload_dropdown_menu)
         button_layout.addWidget(self.single_id_button)
-
 
         # button_layout.addWidget(upload_button)
         button_layout.addWidget(run_query_button)
@@ -210,15 +212,13 @@ class SearchTab(QWidget):
         button_layout.addWidget(refresh_button)
         button_layout.addWidget(self.actions_button)
 
-
         heading_text = QLabel("WELCOME...")
         heading_text.setStyleSheet("font-size: 30px; margin: 10px 0px; line-height: 28px; font-weight: bold; color: #0f172a; ")
 
         header_layout = QHBoxLayout()
         header_layout.addWidget(heading_text)
         header_layout.addLayout(button_layout)
-        header_layout.addSpacerItem(QSpacerItem(0 ,20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Ignored))
-
+        header_layout.addSpacerItem(QSpacerItem(0, 20, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Ignored))
 
         search_layout.addLayout(header_layout)
 
@@ -229,18 +229,14 @@ class SearchTab(QWidget):
 
         self.load_template_data()
 
-
     def load_template_data(self) -> None:
         """Load the template data into the table view."""
         try:
-            template_file = os.path.join(
-                base_directory, "resources", "template_ids.csv"
-            )
+            template_file = os.path.join(base_directory, "resources", "template_ids.csv")
             dataframe = pd.read_csv(template_file)
             self.update_table_model(dataframe)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load template file: {str(e)}")
-
 
     def update_table_model(self, dataframe: pd.DataFrame) -> None:
         """Update the table view with new data."""
@@ -263,7 +259,6 @@ class SearchTab(QWidget):
         except Exception as e:
             print(f"Error in updating table model: {e}")
 
-
     @pyqtSlot()
     def on_save_query(self) -> None:
         """Save the results of the query to the file system"""
@@ -277,19 +272,13 @@ class SearchTab(QWidget):
 
         print(f"File to saved to the file system under the following name {self.current_file_path}")
 
-
-
-
-
     @pyqtSlot()
     def download_template_slot(self) -> None:
         """Download the template file to the user's Downloads folder."""
         template_file = os.path.join(base_directory, "resources", "template_ids.csv")
 
         if os.path.isfile(template_file):
-            destination = os.path.join(
-                os.path.expanduser("~"), "Downloads", "template_ids.csv"
-            )
+            destination = os.path.join(os.path.expanduser("~"), "Downloads", "template_ids.csv")
             shutil.copy(template_file, destination)
             QMessageBox.information(
                 self,
@@ -303,7 +292,6 @@ class SearchTab(QWidget):
                 "File was unable to download. Please try again.",
             )
 
-
     @pyqtSlot()
     def upload_ids_file_slot(self) -> None:
         """Open the form dialog to upload IDs file."""
@@ -312,7 +300,6 @@ class SearchTab(QWidget):
 
         if form_dialog.exec() == QDialog.DialogCode.Accepted:
             print("Dialog submission was successful...")
-
 
     @pyqtSlot()
     def on_single_id_trigger(self) -> None:
@@ -323,12 +310,10 @@ class SearchTab(QWidget):
         if form_dialog.exec() == QDialog.DialogCode.Accepted:
             pass
 
-
     @pyqtSlot(pd.DataFrame)
     def on_data_loaded(self, dataframe: pd.DataFrame) -> None:
         """Handle the loaded data from the UploadFormDialog."""
         self.update_table_model(dataframe)
-
 
     @pyqtSlot()
     def run_query_slot(self) -> None:
@@ -348,17 +333,13 @@ class SearchTab(QWidget):
             print(f"data store columns = {data_store_df}")
 
             if "BS_ID" not in data_store_df.columns:
-                QMessageBox.critical(
-                    self, "Error", "'data store.csv' must contain 'BS_ID' column."
-                )
+                QMessageBox.critical(self, "Error", "'data store.csv' must contain 'BS_ID' column.")
                 return
 
             self.process_csv_file(data_store_df)
 
         except Exception as e:
-            QMessageBox.critical(
-                self, "Error", f"Failed to load data store file: {str(e)}"
-            )
+            QMessageBox.critical(self, "Error", f"Failed to load data store file: {str(e)}")
 
     def process_csv_file(self, data_store_df: pd.DataFrame) -> None:
         """Process the data store csv file and merge it with the current data."""
@@ -381,9 +362,7 @@ class SearchTab(QWidget):
             print("exporting data to csv")
 
             output_dir = os.path.join(base_directory, "resources")
-            os.makedirs(
-                output_dir, exist_ok=True
-            )  # Create the directory if it doesn't exist
+            os.makedirs(output_dir, exist_ok=True)  # Create the directory if it doesn't exist
 
             try:
                 print("exporting data to csv")
@@ -410,23 +389,16 @@ class SearchTab(QWidget):
 
         except Exception as e:
             print(f"Error: {e}")
-            QMessageBox.critical(
-                self, "Error", f"Failed to process the query, {str(e)}"
-            )
-
+            QMessageBox.critical(self, "Error", f"Failed to process the query, {str(e)}")
 
     @pyqtSlot()
     def on_delete_file(self) -> None:
         """delete the file from the file system"""
         file_to_delete = self.current_file_path.replace("RAW_ID", "PROFILE")
         if not os.path.exists(file_to_delete):
-	        QMessageBox.critical(self, "Error", "Failed to a non profile file")
-
+            QMessageBox.critical(self, "Error", "Failed to a non profile file")
         else:
-        	os.remove(file_to_delete)
-
-
-
+            os.remove(file_to_delete)
 
     def on_edit_click(self) -> None:
         file_to_open = self.form_dialog.saved_file_path
@@ -436,11 +408,11 @@ class SearchTab(QWidget):
             return
         try:
             if platform.system() == "Darwin":
-                subprocess.run(['open', file_to_open], check=True)
+                subprocess.run(["open", file_to_open], check=True)
             elif platform.system() == "Windows":
-                os.startfile(file_to_open)
+                os.startfile(file_to_open)  # type: ignore
             else:
-                subprocess.run(['xdg-open', file_to_open])
+                subprocess.run(["xdg-open", file_to_open])
 
         except Exception as e:
             print("Error", f"Failed to open file: {e}")
@@ -449,7 +421,6 @@ class SearchTab(QWidget):
     @pyqtSlot()
     def on_refresh_click(self) -> None:
         """Slot to update the table when the refresh button is clicked"""
-
 
         # Determine which file path to use
         active_file_path = None
@@ -491,7 +462,6 @@ class SearchTab(QWidget):
             self.current_file_path = file_path
             self.form_dialog.saved_file_path = file_path
             dataframe = pd.read_csv(file_path)
-
 
             self.update_table_model(dataframe)
             QMessageBox.information(self, "File Loaded", f"Loaded data from {file_path}")

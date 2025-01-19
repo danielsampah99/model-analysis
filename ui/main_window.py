@@ -1,15 +1,7 @@
 import os
 
-
-from PyQt6.QtWidgets import (
-    QWidget,
-    QMainWindow,
-    QVBoxLayout,
-    QHBoxLayout,
-    QPushButton,
-    QStackedLayout
-)
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QPushButton, QStackedLayout, QVBoxLayout, QWidget
 
 from .file_explorer import FileExplorer
 from .team_a_page import TeamAPage
@@ -24,16 +16,12 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800, 800)
 
         # getting the directory
-        base_directory = os.path.join(os.getcwd(), 'providers', 'raw-ids')
+        base_directory = os.path.join(os.getcwd(), "providers", "raw-ids")
 
         # sidebar
         self.file_explorer = FileExplorer(base_directory)
         self.file_explorer.file_selected.connect(self.on_file_selected)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.file_explorer)
-
-
-
-
 
         # Creating the different layouts
         page_layout = QVBoxLayout()
@@ -45,7 +33,7 @@ class MainWindow(QMainWindow):
 
         # creating the tabs for the teams
         team_a_tab_button = QPushButton("FINANCIAL ANALYST")
-        team_a_tab_button.clicked.connect(self.activate_team_a_tab) #type: ignore
+        team_a_tab_button.clicked.connect(self.activate_team_a_tab)  # type: ignore
 
         tabs_layout.addWidget(team_a_tab_button)
         self.team_a_page = TeamAPage()

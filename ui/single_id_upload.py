@@ -1,9 +1,10 @@
 # Single id upload
 import os
 from typing import Optional
-from PyQt6.QtWidgets import QWidget, QPushButton, QFormLayout, QLineEdit, QComboBox, QLabel, QMessageBox, QDialog
-from PyQt6.QtCore import QPropertyAnimation, pyqtSlot
+
 import pandas as pd
+from PyQt6.QtCore import QPropertyAnimation, pyqtSlot
+from PyQt6.QtWidgets import QComboBox, QDialog, QFormLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QWidget
 
 from ui.file_explorer import FileExplorer
 
@@ -86,6 +87,7 @@ form_styles = """
         }
        """
 
+
 class SingleIdDialog(QDialog):
     def __init__(self, file_explorer: FileExplorer, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
@@ -108,15 +110,11 @@ class SingleIdDialog(QDialog):
         self.init_ui()
 
     def init_ui(self) -> None:
-
-
         # form
         self.setMinimumWidth(500)
         self.setStyleSheet(form_styles)
         form_layout = QFormLayout(self)
         form_layout.setContentsMargins(24, 24, 24, 24)
-
-
 
         self.provider_name_label = QLabel(self)
         self.provider_name_label.setText("Model Provider's Name")
@@ -125,11 +123,12 @@ class SingleIdDialog(QDialog):
         self.provider_name_input.setPlaceholderText("Model provider's name...")
         self.provider_name_input.setToolTip("Enter the full name of the new provider")
 
-
         #  Model Line Of Business dropdown
         self.model_lob_options: list[str] = ["Commercial", "SHP", "Medicaid"]
         self.model_lob_dropdown = QComboBox(self)
-        self.model_lob_dropdown.setStyleSheet(f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}")
+        self.model_lob_dropdown.setStyleSheet(
+            f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}"
+        )
         self.model_lob_dropdown.setPlaceholderText("Line of business...")
         self.model_lob_dropdown.setToolTip("Select the line of business for this provider")
 
@@ -137,7 +136,6 @@ class SingleIdDialog(QDialog):
         self.model_lob_label.setStyleSheet(label_styles)
         self.model_lob_dropdown.addItems(self.model_lob_options)
         self.model_lob_dropdown.setCurrentText(self.model_lob_options[0])
-
 
         provider_id_label = QLabel(self)
         provider_id_label.setStyleSheet(label_styles)
@@ -148,12 +146,12 @@ class SingleIdDialog(QDialog):
         self.provider_id_input.setStyleSheet(input_styles)
         self.provider_id_input.setToolTip("Enter the provider's unique identifier")
 
-
         # submit button
         # Button
         self.submit_button = QPushButton("Submit")
         self.submit_button.setStyleSheet(
-            "border-radius: 6px; background-color: #4f46e5; padding: 12px 8px; font-size: 14px; font-weight: 600; color: white; ")
+            "border-radius: 6px; background-color: #4f46e5; padding: 12px 8px; font-size: 14px; font-weight: 600; color: white; "
+        )
         self.submit_button.setObjectName("dialogButton")
         self.submit_button.clicked.connect(self.on_form_submit)
 
@@ -164,10 +162,7 @@ class SingleIdDialog(QDialog):
         form_layout.addRow(provider_id_label, self.provider_id_input)
         form_layout.addRow(self.submit_button)
 
-
-
         self.setLayout(form_layout)
-
 
     @pyqtSlot()
     def on_form_submit(self):
@@ -179,7 +174,7 @@ class SingleIdDialog(QDialog):
         # todo: refresh the sidebar.
 
     def form_validation(self) -> None:
-        """ validate single id form"""
+        """validate single id form"""
         if not self.provider_name_input.text():
             self.show_error("Model's provider name cannot be empty")
 
@@ -201,21 +196,28 @@ class SingleIdDialog(QDialog):
         # make the path if it doesn't exist
         os.makedirs(destination_path, exist_ok=True)
 
-        df=pd.DataFrame(data={ 'BS_ID': [str(self.provider_id_input.text())], 'Model Name': [self.provider_name_input.text()], 'Model Line of Business': [self.model_lob_dropdown.currentText()] })
+        df = pd.DataFrame(
+            data={
+                "BS_ID": [str(self.provider_id_input.text())],
+                "Model Name": [self.provider_name_input.text()],
+                "Model Line of Business": [self.model_lob_dropdown.currentText()],
+            }
+        )
 
-        output_file_path = os.path.join(destination_path, f"{self.provider_name_input.text().upper()}_{self.model_lob_dropdown.currentText().upper()}-RAW_ID.csv")
+        output_file_path = os.path.join(
+            destination_path, f"{self.provider_name_input.text().upper()}_{self.model_lob_dropdown.currentText().upper()}-RAW_ID.csv"
+        )
 
         # save the file to the destination
         df.to_csv(output_file_path, index=False)
 
         # Refresh the file explorer after creating the file.
-        print(f'trying to load: {output_file_path}')
-
+        print(f"trying to load: {output_file_path}")
 
         if self.file_explorer:
             print(f"File explorer instance found: {self.file_explorer}")
             print("Emitting refresh_requested signal")
-            print('found the file explorer class')
+            print("found the file explorer class")
             self.file_explorer.refresh()
         else:
             print("No file explorer instance found!")

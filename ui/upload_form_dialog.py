@@ -1,21 +1,10 @@
 import os
 import shutil
 
-from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (
-    QComboBox,
-    QPushButton,
-    QMessageBox,
-    QFileDialog,
-    QDialog,
-    QFormLayout,
-    QLabel,
-    QLineEdit
-)
-from PyQt6.QtCore import pyqtSignal, QSize, pyqtSlot, Qt
-
-from typing import Optional
 import pandas as pd
+from PyQt6.QtCore import QSize, Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QComboBox, QDialog, QFileDialog, QFormLayout, QLabel, QLineEdit, QMessageBox, QPushButton
 
 base_directory = os.getcwd()
 
@@ -35,6 +24,7 @@ upload_form_styles = """
     }
 """
 
+
 class UploadFormDialog(QDialog):
     data_loaded = pyqtSignal(pd.DataFrame)
     saved_file_path_signal = pyqtSignal(str)
@@ -51,7 +41,7 @@ class UploadFormDialog(QDialog):
         self.setWindowFlags(Qt.WindowType.Dialog)
 
         self.blue_shield_id_data = pd.DataFrame()
-        self.selected_file: Optional[str] = ""
+        self.selected_file: str = ""
 
         self.model_lob_options: list[str] = ["Commercial", "SHP", "Medicaid"]
 
@@ -68,14 +58,18 @@ class UploadFormDialog(QDialog):
         # Provider's name input, label and styles.
         self.filename_input = QLineEdit(self)
         self.filename_input.setPlaceholderText("Provider's name...")
-        self.filename_input.setStyleSheet(f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}")
+        self.filename_input.setStyleSheet(
+            f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}"
+        )
         self.file_name_label = QLabel(text="Model Provider's Name")
         self.file_name_label.setStyleSheet(label_styles)
         form_layout.addRow(self.file_name_label, self.filename_input)
 
         #  Model Line Of Business dropdown
         self.model_lob_dropdown = QComboBox(self)
-        self.model_lob_dropdown.setStyleSheet(f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}")
+        self.model_lob_dropdown.setStyleSheet(
+            f"{input_styles} QLineEdit::placeholder {{color: #9CA3AF;}} QLineEdit::focus {{border: 2px solid #4F46E5;}}"
+        )
         self.model_lob_dropdown.setPlaceholderText("Line of business...")
         self.model_lob_label = QLabel("Model Line Of Business")
         self.model_lob_label.setStyleSheet(label_styles)
@@ -84,7 +78,9 @@ class UploadFormDialog(QDialog):
 
         # File selection button and label.
         self.file_button = QPushButton("Select Model Provider IDs")
-        self.file_button.setStyleSheet("border-radius: 6px; padding: 8px 6px; font-weight: 600; color: #4f46e5; background-color: #eef2ff; font-size: 14px; line-height: 20px; ")
+        self.file_button.setStyleSheet(
+            "border-radius: 6px; padding: 8px 6px; font-weight: 600; color: #4f46e5; background-color: #eef2ff; font-size: 14px; line-height: 20px; "
+        )
         self.file_button.clicked.connect(self.select_file)
         self.selected_file_label = QLabel("")  # Initialized with empty text
         form_layout.addRow(self.file_button, self.selected_file_label)
@@ -92,14 +88,18 @@ class UploadFormDialog(QDialog):
         # download template file button
         self.download_template_button = QPushButton(icon=QIcon("./icons/download_template_icon.svg"), text="Download Template File")
         self.download_template_button.setIconSize(QSize(20, 20))
-        self.download_template_button.setStyleSheet("border-radius: 6px; background-color: white; padding: 8px 12px; font-size: 14px; font-weight: 600; color: #111827; border: 1px solid #D1D5DB;")
+        self.download_template_button.setStyleSheet(
+            "border-radius: 6px; background-color: white; padding: 8px 12px; font-size: 14px; font-weight: 600; color: #111827; border: 1px solid #D1D5DB;"
+        )
 
         self.download_template_button.clicked.connect(self.download_template_slot)
         form_layout.addRow(self.download_template_button)
 
         #  Form Submission Button
         self.submit_button = QPushButton("Submit")
-        self.submit_button.setStyleSheet("border-radius: 6px; background-color: #4f46e5; padding: 12px 8px; font-size: 14px; font-weight: 600; color: white; ")
+        self.submit_button.setStyleSheet(
+            "border-radius: 6px; background-color: #4f46e5; padding: 12px 8px; font-size: 14px; font-weight: 600; color: white; "
+        )
         self.submit_button.clicked.connect(self.submit_data)
 
         # Adding the widgets to the form's layout.
@@ -116,30 +116,24 @@ class UploadFormDialog(QDialog):
 
         #  check if file exists. if it exists, download the file to the user's computer. and alert them the file has been downloaded.
         if os.path.isfile(template_file):
-            destination = os.path.join(
-                os.path.expanduser("~"), "Downloads", "template_ids.csv"
-            )
+            destination = os.path.join(os.path.expanduser("~"), "Downloads", "template_ids.csv")
 
             shutil.copy(template_file, destination)
 
             #  show a file download complete alert to the user
-            QMessageBox.information(self,"File Download Success.",f"Template file was downloaded to {destination}")
+            QMessageBox.information(self, "File Download Success.", f"Template file was downloaded to {destination}")
 
         else:
-            QMessageBox.warning(self,"File Not Found Error","File was unable to download. please try again.")
+            QMessageBox.warning(self, "File Not Found Error", "File was unable to download. please try again.")
 
     def select_file(self) -> None:
         file_dialog = QFileDialog(self)
         file_dialog.setFileMode(QFileDialog.FileMode.ExistingFile)
-        file_dialog.setDirectory(
-            os.path.join(os.path.expanduser("~"), "Downloads")
-        )  # TODO: should change to s drive in prod
+        file_dialog.setDirectory(os.path.join(os.path.expanduser("~"), "Downloads"))  # TODO: should change to s drive in prod
         file_dialog.setNameFilter("File containing list of ids(*.csv)")
 
         if file_dialog.exec():
-            self.selected_file = file_dialog.selectedFiles()[
-                0
-            ]  # GET THE PATH OF THE SELECTED FILE
+            self.selected_file = file_dialog.selectedFiles()[0]  # GET THE PATH OF THE SELECTED FILE
             self.selected_file_label.setText(os.path.basename(self.selected_file))
 
     def submit_data(self) -> None:
@@ -149,23 +143,16 @@ class UploadFormDialog(QDialog):
         blue_shield_provider_name = self.filename_input.text()
         model_lob_value = self.model_lob_dropdown.currentText()
 
-
         # Form Validation
         if not selected_file_name_value:
-            QMessageBox.warning(
-                self, "Error", "please select a file that contains only the ids."
-            )
+            QMessageBox.warning(self, "Error", "please select a file that contains only the ids.")
             return
 
         if not self.model_lob_dropdown:
-            QMessageBox.warning(
-                self, "Error", "Please a select a value form the Model LOB field"
-            )
+            QMessageBox.warning(self, "Error", "Please a select a value form the Model LOB field")
 
         if not blue_shield_provider_name:
-            QMessageBox.warning(
-                self, "Error", "Please enter the Blue Shield Provider's name"
-            )
+            QMessageBox.warning(self, "Error", "Please enter the Blue Shield Provider's name")
             return
 
         self.load_provider_from_csv(
@@ -176,9 +163,7 @@ class UploadFormDialog(QDialog):
 
         # self.accept()
 
-    def load_provider_from_csv(
-        self, file_path: str, blue_shield_provider_name: str, model_lob_value: str
-    ):
+    def load_provider_from_csv(self, file_path: str, blue_shield_provider_name: str, model_lob_value: str):
         if not file_path:
             return
 
@@ -195,9 +180,7 @@ class UploadFormDialog(QDialog):
             dataframe.insert(2, "Model Line of Business", model_lob_value)
 
             destination_path = os.path.join(f"{base_directory}", "providers", "raw-ids", blue_shield_provider_name)
-            os.makedirs(
-                destination_path, exist_ok=True
-            )  # create the directory is it's non-existent.
+            os.makedirs(destination_path, exist_ok=True)  # create the directory is it's non-existent.
 
             output_file_name = os.path.join(
                 destination_path,
@@ -208,9 +191,7 @@ class UploadFormDialog(QDialog):
             self.blue_shield_id_data = dataframe  # assigning the filename to the property that will transfer the file path to the table view.
 
             #  success confirmation
-            QMessageBox.information(
-                self, "Success", f"File saved successfully: {output_file_name}"
-            )
+            QMessageBox.information(self, "Success", f"File saved successfully: {output_file_name}")
 
             # sending the output file name to the saved file path signal
             self.push_file_path(output_file_name)
@@ -218,9 +199,7 @@ class UploadFormDialog(QDialog):
             self.data_loaded.emit(self.blue_shield_id_data)
 
         except FileNotFoundError:
-            QMessageBox.warning(
-                self, "Error", "file not found or save was unsuccessful"
-            )
+            QMessageBox.warning(self, "Error", "file not found or save was unsuccessful")
         except Exception as e:
             QMessageBox.warning(self, "Error", f"Error loading {file_path}: {e}")
 

@@ -2,9 +2,9 @@ import os
 from typing import Optional
 
 import pandas as pd
-from PyQt6.QtGui import QFileSystemModel
-from PyQt6.QtWidgets import QTreeView, QWidget, QVBoxLayout, QDockWidget, QMessageBox
 from PyQt6.QtCore import QModelIndex, Qt, pyqtSignal, pyqtSlot
+from PyQt6.QtGui import QFileSystemModel
+from PyQt6.QtWidgets import QDockWidget, QMessageBox, QTreeView, QVBoxLayout, QWidget
 
 # file_explorer_stylesheet = """
 #     QTreeWidget {
@@ -64,12 +64,12 @@ file_explorer_stylesheet = """
     }
 """
 
+
 class FileExplorer(QDockWidget):
     file_selected = pyqtSignal(str)
     data_loaded = pyqtSignal(pd.DataFrame)
 
-
-    def __init__(self, directory: str,  parent=None):
+    def __init__(self, directory: str, parent=None):
         super().__init__(parent)
 
         # widget to hold the layout.
@@ -81,7 +81,6 @@ class FileExplorer(QDockWidget):
         self.model.setNameFilterDisables(False)
         self.model.setRootPath(directory)
         self.base_directory = directory
-
 
         # Set up the tree view.
         self.tree_view = QTreeView()
@@ -95,20 +94,19 @@ class FileExplorer(QDockWidget):
         self.tree_view.hideColumn(2)  # Type
         self.tree_view.hideColumn(3)  # Date Modified
 
-
         # handle file selection
         self.tree_view.clicked.connect(self._on_file_clicked)
-
 
         self.current_selected_file: Optional[str] = None
 
         self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea)
-        self.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetClosable | QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable)
+        self.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetClosable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+            | QDockWidget.DockWidgetFeature.DockWidgetFloatable
+        )
 
-
-		# Create the layout without the parent.
-
-
+        # Create the layout without the parent.
 
         file_explorer_layout = QVBoxLayout()
         file_explorer_layout.setContentsMargins(0, -50, 5, 20)
@@ -121,8 +119,6 @@ class FileExplorer(QDockWidget):
         print(f"Directory being loaded: {directory}")
         print(f"Files in directory: {os.listdir(directory)}")
 
-
-
     @pyqtSlot(QModelIndex)
     def _on_file_clicked(self, index):
         file_path = self.model.filePath(index)
@@ -134,7 +130,6 @@ class FileExplorer(QDockWidget):
             except Exception as e:
                 QMessageBox.warning(self, "Error", f"Failed to load file: {str(e)}")
 
-
     def refresh(self):
         """Refresh the file system view"""
         # Force the model to refresh its data
@@ -143,4 +138,4 @@ class FileExplorer(QDockWidget):
         self.model.setRootPath(self.base_directory)  # Set it back
         self.tree_view.setRootIndex(self.model.index(self.base_directory))
         if current_index.isValid():
-                    self.tree_view.setCurrentIndex(current_index)
+            self.tree_view.setCurrentIndex(current_index)
