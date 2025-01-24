@@ -187,7 +187,7 @@ class SingleIdDialog(QDialog):
         # create a file from the form's data
         destination_path = os.path.join(
             f"{self.utils.get_current_year_directory()}",
-            f"{self.provider_name_input.text()}-{self.utils.format_model_type_name(self.model_type_dropdown.currentText())}",
+            f"{self.provider_name_input.text().title()}-{self.utils.format_model_type_name(self.model_type_dropdown.currentText())}",
         )
 
         # make the path if it doesn't exist

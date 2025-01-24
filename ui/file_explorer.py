@@ -116,9 +116,6 @@ class FileExplorer(QDockWidget):
         self.content_widget.setLayout(file_explorer_layout)
         self.setWidget(self.content_widget)
 
-        print(f"Directory being loaded: {directory}")
-        print(f"Files in directory: {os.listdir(directory)}")
-
     @pyqtSlot(QModelIndex)
     def _on_file_clicked(self, index):
         file_path = self.model.filePath(index)

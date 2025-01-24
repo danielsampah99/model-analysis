@@ -181,8 +181,6 @@ class SearchTab(QWidget):
         self.actions_dropdown_menu.setMinimumWidth(self.actions_button.width())
         self.actions_dropdown_menu.setStyleSheet(dropdown_menu_styles)
 
-        print(f"button width: {self.actions_button.width()}")
-
         # dropdown actions
         self.edit_button = QAction("Edit", self)
         self.actions_dropdown_menu.addAction(self.edit_button)
@@ -243,11 +241,6 @@ class SearchTab(QWidget):
         # self.current_df = dataframe
         # model = BlueShieldIdModel(dataframe)
         # self.table_view.setModel(model)
-
-        if dataframe is None or dataframe.empty:
-            print("DataFrame is None or empty!")  # Debugging step
-        else:
-            print(dataframe.head())  # Print the first few rows for verification
 
         self.current_df = dataframe  # Store the new dataframe
 
@@ -457,7 +450,7 @@ class SearchTab(QWidget):
     @pyqtSlot(str)
     def on_load_sidebar_file_to_table(self, file_path: str) -> None:
         """Load the selected file from FileExplorer sidebar into the table view."""
-        print(f"load_file_to_table called with file_path: {file_path}")
+
         try:
             self.current_file_path = file_path
             self.form_dialog.saved_file_path = file_path

@@ -61,7 +61,6 @@ class MainWindow(QMainWindow):
         self.stack_layout.setCurrentIndex(1)
 
     def on_file_selected(self, file_path: str):
-        print(f"file being loaded: {file_path}")
         self.team_a_page.search_tab.on_load_sidebar_file_to_table(file_path)
 
     def create_starting_folders(self):
