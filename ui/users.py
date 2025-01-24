@@ -1,9 +1,23 @@
 # the financial analysts tab.
-from typing import Optional
+from typing import List, Optional
 
-from PyQt6.QtCore import QSize, Qt, pyqtSlot
+from PyQt6.QtCore import QAbstractTableModel, QSize, Qt, pyqtSlot
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QComboBox, QDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QComboBox,
+    QDialog,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTableView,
+    QVBoxLayout,
+    QWidget,
+)
+
+from database import Database, DatabaseUser
 
 main_button_style = """
             QPushButton {
@@ -102,18 +116,35 @@ validation_error_label_style = "color:red;"
 class Users(QWidget):
     def __init__(self, parent: Optional["QWidget"] = None) -> None:
         super().__init__(parent)
+        self.database = Database()
+        self.heading = Heading(self.database)
 
-        self.heading = Heading()
+        self.model = AllUsersTable(self.fetch_all_users())
+        self.table = QTableView()
+        self.table.setModel(self.model)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         layout = QVBoxLayout()
         layout.addWidget(self.heading, alignment=Qt.AlignmentFlag.AlignTop)
+        layout.addWidget(self.table)
         self.setLayout(layout)
+
+    def fetch_all_users(self):
+        data = self.database.get_all_users()
+        print(data)
+        return data
 
 
 class Heading(QWidget):
     # the heading for the financial anaylst page.
-    def __init__(self, parent: Optional["QWidget"] = None) -> None:
+    def __init__(
+        self,
+        db: Database,
+        parent: Optional["QWidget"] = None,
+    ) -> None:
         super().__init__(parent)
+
+        self.database = db
 
         self.init_ui()
 
@@ -154,6 +185,7 @@ class Heading(QWidget):
 class NewUserForm(QDialog):
     def __init__(self, parent: Optional["QWidget"] = None) -> None:
         super().__init__(parent)
+        self.database = Database()
         self.init_ui()
 
     def init_ui(self):
@@ -255,6 +287,48 @@ class NewUserForm(QDialog):
                 "email": self.email_input.text().lower(),
                 "role": self.group_combo.currentText().lower(),
             }
-
+            self.database.create_new_user(
+                email=saved_data["email"], first_name=saved_data["first_name"], last_name=saved_data["last_name"], role=saved_data["role"]
+            )
             print(f"data going into the database: {saved_data}")
             self.accept()
+
+
+class AllUsersTable(QAbstractTableModel):
+    """show all the users in the database regardless of the role."""
+
+    def __init__(self, users: List[DatabaseUser]) -> None:
+        super().__init__()
+        self.users = users or []
+
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
+            user = self.users[index.row()]
+
+            if index.column() == 0:
+                return user.first_name.title()
+            elif index.column() == 1:
+                return user.last_name.title()
+            elif index.column() == 2:
+                return user.email
+            elif index.column() == 3:
+                return user.role.upper()
+            elif index.column() == 4:
+                return user.created_at
+
+        return None
+
+    def rowCount(self, parent=None) -> int:
+        """return the total number of rows in the data"""
+        return len(self.users)
+
+    def columnCount(self, parent=None) -> int:
+        """return the total number of columns the data could have"""
+        return len(self.users[0]) if self.users else 0
+
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
+            headers = ["First Name", "Last Name", "Email Address", "Role", "Created At"]
+            return headers[section]
+
+        return super().headerData(section, orientation, role)

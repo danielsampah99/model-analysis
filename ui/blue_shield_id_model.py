@@ -1,6 +1,7 @@
 from typing import Any, Tuple
-from PyQt6.QtCore import QAbstractTableModel, Qt
+
 import pandas as pd
+from PyQt6.QtCore import QAbstractTableModel, Qt
 
 
 class BlueShieldIdModel(QAbstractTableModel):

@@ -4,5 +4,6 @@ CREATE TABLE IF NOT EXISTS users (
 	first_name TEXT NOT NULL,
 	last_name TEXT NOT NULL,
 	email TEXT UNIQUE NOT NULL,
-	role TEXT CHECK (role IN ('provider partner', 'financial analyst'))
+	role TEXT CHECK (role IN ('provider partner', 'financial analyst')),
+	created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
