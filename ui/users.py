@@ -1,7 +1,7 @@
 # the financial analysts tab.
 from typing import Optional
 
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize, Qt, pyqtSlot
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QComboBox, QDialog, QFormLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
 
@@ -95,6 +95,8 @@ new_user_dialog_styles = """
        """
 
 submit_button_styles = "border-radius: 6px; background-color: #4f46e5; padding: 12px 8px; font-size: 14px; font-weight: 600; color: white; "
+validation_error_input_style = "border: 2px solid red; background-color: #FFEEEE;"
+validation_error_label_style = "color:red;"
 
 
 class Users(QWidget):
@@ -165,38 +167,94 @@ class NewUserForm(QDialog):
         self.setStyleSheet(new_user_dialog_styles)
 
         # first name
-        first_name_label = QLabel("First Name")
-        first_name_input = QLineEdit()
-        first_name_input.setPlaceholderText("John")
+        self.first_name_label = QLabel("First Name")
+        self.first_name_input = QLineEdit()
+        self.first_name_input.setPlaceholderText("John")
 
         # last name
-        last_name_label = QLabel("Last Name")
-        last_name_input = QLineEdit()
-        last_name_input.setPlaceholderText("Doe")
+        self.last_name_label = QLabel("Last Name")
+        self.last_name_input = QLineEdit()
+        self.last_name_input.setPlaceholderText("Doe")
 
         # email
-        email_label = QLabel("Email Address")
-        email_input = QLineEdit()
-        email_input.setPlaceholderText("johndoe@gmail.com")
+        self.email_label = QLabel("Email Address")
+        self.email_input = QLineEdit()
+        self.email_input.setPlaceholderText("johndoe@gmail.com")
 
         # user group
         group_label = QLabel("Role", self)
-        group_combo = QComboBox(self)
-        group_combo.setStyleSheet("border: 1px solid #D1D5DB; border-radius: 6px; background: white; font-size: 14px;")
+        self.group_combo = QComboBox(self)
+        self.group_combo.setStyleSheet("border: 1px solid #D1D5DB; border-radius: 6px; background: white; font-size: 14px;")
         group_options = ["Financial Analyst", "Provider Partner"]
-        group_combo.addItems(group_options)
-        group_combo.setCurrentIndex(0)
+        self.group_combo.addItems(group_options)
+        self.group_combo.setCurrentIndex(0)
 
         create_user_button = QPushButton("Create user")
         create_user_button.setStyleSheet(submit_button_styles)
+        create_user_button.clicked.connect(self.on_form_submit)
 
         form_layout.setContentsMargins(12, 12, 12, 12)
         form_layout.setVerticalSpacing(25)
         form_layout.setHorizontalSpacing(15)
-        form_layout.addRow(first_name_label, first_name_input)
-        form_layout.addRow(last_name_label, last_name_input)
-        form_layout.addRow(email_label, email_input)
-        form_layout.addRow(group_label, group_combo)
+        form_layout.addRow(self.first_name_label, self.first_name_input)
+        form_layout.addRow(self.last_name_label, self.last_name_input)
+        form_layout.addRow(self.email_label, self.email_input)
+        form_layout.addRow(group_label, self.group_combo)
         form_layout.addRow(create_user_button)
 
         self.setLayout(form_layout)
+
+    def validate_create_user(self) -> bool:
+        """Validate creating a new user"""
+        errors: list[str] = []
+        email = self.email_input.text()
+
+        if self.first_name_input.text() == "":
+            message = "First name is required"
+            errors.append(message)
+            self.first_name_input.setStyleSheet(validation_error_input_style)
+            self.first_name_label.setStyleSheet(validation_error_label_style)
+            self.first_name_label.setToolTip(message)
+            return False
+        else:
+            self.first_name_input.setStyleSheet("")
+            self.first_name_label.setStyleSheet("")
+
+        if self.last_name_input.text() == "":
+            message = "Last name is required"
+            errors.append(message)
+            self.last_name_input.setStyleSheet(validation_error_input_style)
+            self.last_name_label.setStyleSheet(validation_error_label_style)
+            self.last_name_label.setToolTip(message)
+            return False
+        else:
+            self.last_name_input.setStyleSheet("")
+            self.last_name_label.setStyleSheet("")
+
+        if email == "" or "@" not in email or "." not in email:
+            message = "Invalid email address"
+            errors.append(message)
+            self.email_input.setStyleSheet(validation_error_input_style)
+            self.email_label.setStyleSheet(validation_error_label_style)
+            self.email_label.setToolTip(message)
+            return False
+        else:
+            self.email_input.setStyleSheet("")
+            self.email_label.setStyleSheet("")
+
+        return True
+
+    @pyqtSlot()
+    def on_form_submit(self):
+        """Slot for creating a new user"""
+        if self.validate_create_user():
+            # TODO: Add the user to the database and close the dialog
+            saved_data = {
+                "first_name": self.first_name_input.text().lower(),
+                "last_name": self.last_name_input.text().lower(),
+                "email": self.email_input.text().lower(),
+                "role": self.group_combo.currentText().lower(),
+            }
+
+            print(f"data going into the database: {saved_data}")
+            self.accept()
