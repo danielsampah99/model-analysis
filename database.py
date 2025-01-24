@@ -101,7 +101,7 @@ class Database(QObject):
     def get_all_financial_analysts(self) -> List[str]:
         """Fetch only the full names of financial analysts in the database"""
         query = QSqlQuery(self.connection)
-        statement = "SELECT first_name, last_name FROM users"
+        statement = "SELECT first_name, last_name FROM users WHERE role = 'financial analyst'"
 
         analysts: List[str] = []
 

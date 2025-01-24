@@ -1,13 +1,2 @@
-BS_ID,Model Name,Model Line of Business,Model Type,NPI,TAX_ID,CONTPROV,Provider Name,Par in Ntwk 0011,LIST IN DIRECTORY (NTWK 0011),Specialty Code,Specialty Description,Bill Type,Address Line1,Address Line2,City,State,Zip,Zip4,County Code,County Name,Locality,Care System,Affiliated Care System,STD-CUST,STD-CUST Desc,Withhold Flag,WH Flag Desc,Medicaid Price Agreement,Medicare Price Agreement,CAH Meth Cd,CAH Method Desc,MV_STUS_C,MV_EFF_DT,MV_TRM_DT,LastUpdate
-931930,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931931,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931932,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931933,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931934,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931935,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931936,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931937,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931938,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931939,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931940,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
-931941,candle,Commercial,FACILITY,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+BS_ID,Model Name,Model Line of Business,Model Type,Financial Analyst,NPI,TAX_ID,CONTPROV,Provider Name,Par in Ntwk 0011,LIST IN DIRECTORY (NTWK 0011),Specialty Code,Specialty Description,Bill Type,Address Line1,Address Line2,City,State,Zip,Zip4,County Code,County Name,Locality,Care System,Affiliated Care System,STD-CUST,STD-CUST Desc,Withhold Flag,WH Flag Desc,Medicaid Price Agreement,Medicare Price Agreement,CAH Meth Cd,CAH Method Desc,MV_STUS_C,MV_EFF_DT,MV_TRM_DT,LastUpdate
+2325134513143,iphone,Commercial,FACILITY,Daniel Sampah,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

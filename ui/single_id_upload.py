@@ -6,6 +6,7 @@ import pandas as pd
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QComboBox, QDialog, QFormLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QWidget
 
+from database import Database
 from ui.file_explorer import FileExplorer
 from ui.utils import Utils
 
@@ -82,6 +83,8 @@ class SingleIdDialog(QDialog):
         self.parent_widget = parent
         self.file_explorer = file_explorer
 
+        self.database = Database()
+
         self.submit_button = None
         # self.provider_id_input = None
         # self.provider_name_input = None
@@ -131,13 +134,21 @@ class SingleIdDialog(QDialog):
         self.provider_id_input.setToolTip("Enter the provider's unique identifier")
 
         # Model type dropdown
-        self.model_type_label = QLabel(text="Type of Model Provider", parent=self)
+        self.model_type_label = QLabel(text="Model Type", parent=self)
         self.model_type_label.setStyleSheet(label_styles)
 
         self.model_type_dropdown = QComboBox(self)
         self.model_type_dropdown.setStyleSheet(dropdown_styles)
         self.model_type_dropdown.addItems(self.model_type_options)
-        self.model_type_dropdown.setToolTip("Select the type of model provider")
+        self.model_type_dropdown.setToolTip("Select the model type")
+
+        self.anaylst_label = QLabel(text="Select a financial analyst", parent=self)
+        self.anaylst_label.setStyleSheet(label_styles)
+
+        self.analyst_combo = QComboBox(self)
+        self.analyst_combo.setStyleSheet(dropdown_styles)
+        self.analyst_combo.addItems(self.database.get_all_financial_analysts())
+        self.analyst_combo.setToolTip("Select the financial analyst creating this model")
 
         # submit button
         # Button
@@ -154,6 +165,7 @@ class SingleIdDialog(QDialog):
         form_layout.addRow(provider_id_label, self.provider_id_input)
         form_layout.addRow(self.model_lob_label, self.model_lob_dropdown)
         form_layout.addRow(self.model_type_label, self.model_type_dropdown)
+        form_layout.addRow(self.anaylst_label, self.analyst_combo)
         form_layout.addRow(self.submit_button)
 
         self.setLayout(form_layout)
@@ -199,6 +211,7 @@ class SingleIdDialog(QDialog):
                 "Model Name": [self.provider_name_input.text()],
                 "Model Line of Business": [self.model_lob_dropdown.currentText()],
                 "Model Type": [self.utils.format_model_type_name(self.model_type_dropdown.currentText())],
+                "Financial Analyst": [self.analyst_combo.currentText().title()],
             }
         )
 
