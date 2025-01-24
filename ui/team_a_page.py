@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ui.financial_analysts import FinancialAnalyst
+from ui.users import Users
 
 from .search_tab import SearchTab
 
@@ -26,10 +26,10 @@ class TeamAPage(QWidget):
         tabs.setMovable(True)
 
         self.search_tab = SearchTab()
-        self.financial_analysts = FinancialAnalyst()
+        self.users = Users()
 
         tabs.addTab(self.search_tab, "Search")
-        tabs.addTab(self.financial_analysts, "Financial Analysts")
+        tabs.addTab(self.users, "Users")
 
         page_layout = QVBoxLayout()
 
