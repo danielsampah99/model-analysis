@@ -1,10 +1,10 @@
 # Single id upload
 import os
-from typing import Optional
+from typing import List, Optional
 
 import pandas as pd
 from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QComboBox, QDialog, QFormLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QWidget
+from PyQt6.QtWidgets import QButtonGroup, QCheckBox, QComboBox, QDialog, QFormLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QWidget
 
 from database import Database
 from ui.file_explorer import FileExplorer
@@ -92,6 +92,20 @@ class SingleIdDialog(QDialog):
         # self.model_lob_dropdown = None
         self.model_lob_options = [""]
         self.model_type_options = ["Facility", "Professional", "Behavorial Health", "Surgery Centre", "Anesthesia"]
+        self.cycle_options: List[str] = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ]
         self.model_lob_label = None
 
         self.content = QWidget(self)
@@ -147,8 +161,42 @@ class SingleIdDialog(QDialog):
 
         self.analyst_combo = QComboBox(self)
         self.analyst_combo.setStyleSheet(dropdown_styles)
-        self.analyst_combo.addItems(self.database.get_all_financial_analysts())
+        titled_analyst_names = [analyst.title() for analyst in self.database.get_all_financial_analysts()]
+        self.analyst_combo.addItems(titled_analyst_names)
         self.analyst_combo.setToolTip("Select the financial analyst creating this model")
+
+        # cycle
+        self.cycle_label = QLabel(text="Select a Cycle", parent=self)
+        self.cycle_label.setStyleSheet(label_styles)
+
+        self.cycle_combo = QComboBox(self)
+        self.cycle_combo.setStyleSheet(dropdown_styles)
+        self.cycle_combo.addItems(self.cycle_options)
+        self.cycle_combo.setToolTip("Select the cycle this model will belong to")
+
+        # checkboxes
+        # facility checkboxes
+        self.in_patient_only_checkbox = QCheckBox(self)
+        self.in_patient_only_checkbox.setText("In Patient Only")
+        self.in_patient_only_checkbox.show()  # hide initially and show when a model type has been selected.
+
+        self.out_patient_only_checkbox = QCheckBox(self)
+        self.out_patient_only_checkbox.setText("Out Patient Only")
+        self.out_patient_only_checkbox.show()
+
+        # professional model type - categories
+        # group the checkboxes to make them exclusive. i.e. only should be selected at any point in time.
+        self.professional_categories = QButtonGroup(self)
+        self.clinic_and_anesthesia_checkbox = QCheckBox(self)
+        self.clinic_and_anesthesia_checkbox.setText("Clinic and Anaesthesia")
+        self.clinic_and_anesthesia_checkbox.hide()
+
+        self.clinic_checkbox = QCheckBox(self)
+        self.clinic_checkbox.setText("Clinic")
+        self.clinic_checkbox.hide()
+
+        self.professional_categories.addButton(self.clinic_checkbox)
+        self.professional_categories.addButton(self.clinic_and_anesthesia_checkbox)
 
         # submit button
         # Button
@@ -166,9 +214,37 @@ class SingleIdDialog(QDialog):
         form_layout.addRow(self.model_lob_label, self.model_lob_dropdown)
         form_layout.addRow(self.model_type_label, self.model_type_dropdown)
         form_layout.addRow(self.anaylst_label, self.analyst_combo)
+        form_layout.addRow(self.cycle_label, self.cycle_combo)
+
+        # only show patient checkboxes when the model type is 'facility'
+
+        form_layout.addRow(self.in_patient_only_checkbox, self.out_patient_only_checkbox)
+        form_layout.addRow(self.clinic_checkbox, self.clinic_and_anesthesia_checkbox)
+        self.model_type_dropdown.currentIndexChanged.connect(self.show_model_category_checkboxes)
+
         form_layout.addRow(self.submit_button)
 
         self.setLayout(form_layout)
+
+    @pyqtSlot(int)
+    def show_model_category_checkboxes(self, index: int):
+        """update what checkboxes to show based on the selected model type"""
+        if index == 0:
+            # show only the facility checkboxes and uncheck the hidden checkboxes
+            self.in_patient_only_checkbox.show()
+            self.out_patient_only_checkbox.show()
+            self.clinic_checkbox.hide()
+            self.clinic_and_anesthesia_checkbox.hide()
+            self.clinic_checkbox.setChecked(False)
+            self.clinic_and_anesthesia_checkbox.setChecked(False)
+
+        if index == 1:  # show professional checkboxes
+            self.clinic_checkbox.show()
+            self.clinic_and_anesthesia_checkbox.show()
+            self.in_patient_only_checkbox.hide()
+            self.out_patient_only_checkbox.hide()
+            self.in_patient_only_checkbox.setChecked(False)
+            self.out_patient_only_checkbox.setChecked(False)
 
     @pyqtSlot()
     def on_form_submit(self):
