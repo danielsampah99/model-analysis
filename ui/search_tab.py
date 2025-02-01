@@ -457,6 +457,6 @@ class SearchTab(QWidget):
             dataframe = pd.read_csv(file_path)
 
             self.update_table_model(dataframe)
-            QMessageBox.information(self, "File Loaded", f"Loaded data from {file_path}")
+            # QMessageBox.information(self, "File Loaded", f"Loaded data from {file_path}")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load file: {e}")
