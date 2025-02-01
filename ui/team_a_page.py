@@ -26,10 +26,8 @@ class TeamAPage(QWidget):
         tabs.setMovable(True)
 
         self.search_tab = SearchTab()
-        self.users = Users()
 
         tabs.addTab(self.search_tab, "Search")
-        tabs.addTab(self.users, "Users")
 
         page_layout = QVBoxLayout()
 

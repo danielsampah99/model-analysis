@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QPushButton, QStackedLayou
 from .file_explorer import FileExplorer
 from .team_a_page import TeamAPage
 from .team_b_page import TeamBPage
+from .admin_page import AdminPage
 
 
 class MainWindow(QMainWindow):
@@ -15,6 +16,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Model Analysis")
         self.setMinimumSize(800, 800)
+        self.admin_page = AdminPage()
 
         # getting the directory
         self.base_directory = os.path.join(os.getcwd(), "providers", "raw-ids")
@@ -50,15 +52,26 @@ class MainWindow(QMainWindow):
 
         self.stack_layout.addWidget(self.team_b_page)
 
+        self.admin_page_trigger = QPushButton("Administrator")
+        tabs_layout.addWidget(self.admin_page_trigger)
+        self.admin_page_trigger.clicked.connect(self.activate_admin_tab)
+        self.stack_layout.addWidget(self.admin_page)
+
         widget = QWidget()
         widget.setLayout(page_layout)
         self.setCentralWidget(widget)
 
     def activate_team_a_tab(self):
         self.stack_layout.setCurrentIndex(0)
+        self.file_explorer.setVisible(True)
 
     def activate_team_b_tab(self):
         self.stack_layout.setCurrentIndex(1)
+
+    def activate_admin_tab(self):
+        """select the admin page"""
+        self.stack_layout.setCurrentIndex(2)
+        self.file_explorer.setVisible(False)
 
     def on_file_selected(self, file_path: str):
         self.team_a_page.search_tab.on_load_sidebar_file_to_table(file_path)
