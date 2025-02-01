@@ -246,7 +246,7 @@ class SingleIdDialog(QDialog):
             self.in_patient_only_checkbox.setChecked(False)
             self.out_patient_only_checkbox.setChecked(False)
 
-        if index != 1 or index != 0:
+        if index != 1 and index != 0:
             """hide the facility checkboxes if other options are selected"""
             self.in_patient_only_checkbox.hide()
             self.out_patient_only_checkbox.hide()
@@ -302,7 +302,9 @@ class SingleIdDialog(QDialog):
         destination_path = os.path.join(
             f"{self.utils.get_current_year_directory()}",
             f"{self.cycle_combo.currentText()}",
-            f"{self.provider_name_input.text().title()}-{self.utils.format_model_type_name(self.model_type_dropdown.currentText())}",
+            f"{self.utils.format_model_type_name(self.model_type_dropdown.currentText())}",
+            f"{self.model_lob_dropdown.currentText().upper()}",
+            f"{self.provider_name_input.text().title()}",
         )
 
         # make the path if it doesn't exist
