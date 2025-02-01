@@ -4,10 +4,10 @@ from datetime import datetime
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QHBoxLayout, QMainWindow, QPushButton, QStackedLayout, QVBoxLayout, QWidget
 
+from .admin_page import AdminPage
 from .file_explorer import FileExplorer
 from .team_a_page import TeamAPage
 from .team_b_page import TeamBPage
-from .admin_page import AdminPage
 
 
 class MainWindow(QMainWindow):

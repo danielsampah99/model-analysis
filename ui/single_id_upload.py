@@ -246,6 +246,17 @@ class SingleIdDialog(QDialog):
             self.in_patient_only_checkbox.setChecked(False)
             self.out_patient_only_checkbox.setChecked(False)
 
+        if index != 1 or index != 0:
+            """hide the facility checkboxes if other options are selected"""
+            self.in_patient_only_checkbox.hide()
+            self.out_patient_only_checkbox.hide()
+            self.clinic_checkbox.hide()
+            self.clinic_and_anesthesia_checkbox.hide()
+            self.clinic_checkbox.setChecked(False)
+            self.clinic_and_anesthesia_checkbox.setChecked(False)
+            self.in_patient_only_checkbox.setChecked(False)
+            self.out_patient_only_checkbox.setChecked(False)
+
     @pyqtSlot()
     def on_form_submit(self):
         """Submit the single id form"""
@@ -289,7 +300,8 @@ class SingleIdDialog(QDialog):
         print("\n=== Starting write_data_to_file ===")
         # create a file from the form's data
         destination_path = os.path.join(
-            f"{self.utils.get_current_year_directory()}", f"{self.cycle_combo.currentText()}",
+            f"{self.utils.get_current_year_directory()}",
+            f"{self.cycle_combo.currentText()}",
             f"{self.provider_name_input.text().title()}-{self.utils.format_model_type_name(self.model_type_dropdown.currentText())}",
         )
 
@@ -303,7 +315,7 @@ class SingleIdDialog(QDialog):
                 "Model Line of Business": [self.model_lob_dropdown.currentText()],
                 "Model Type": [self.utils.format_model_type_name(self.model_type_dropdown.currentText())],
                 "Financial Analyst": [self.analyst_combo.currentText().title()],
-                "Model Category": [self.selected_model_category()]
+                "Model Category": [self.selected_model_category()],
             }
         )
 
