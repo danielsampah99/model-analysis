@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
 
     def create_starting_folders(self):
         """create the folders by which the whole application will organize models into years"""
-        number_of_years = 10
+        number_of_years = 2
         current_year = datetime.now().year
 
         for i in range(number_of_years):

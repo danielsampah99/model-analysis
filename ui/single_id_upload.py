@@ -177,11 +177,11 @@ class SingleIdDialog(QDialog):
         # checkboxes
         # facility checkboxes
         self.in_patient_only_checkbox = QCheckBox(self)
-        self.in_patient_only_checkbox.setText("In Patient Only")
+        self.in_patient_only_checkbox.setText("In Patient")
         self.in_patient_only_checkbox.show()  # hide initially and show when a model type has been selected.
 
         self.out_patient_only_checkbox = QCheckBox(self)
-        self.out_patient_only_checkbox.setText("Out Patient Only")
+        self.out_patient_only_checkbox.setText("Out Patient")
         self.out_patient_only_checkbox.show()
 
         # professional model type - categories
@@ -212,9 +212,9 @@ class SingleIdDialog(QDialog):
         form_layout.addRow(self.provider_name_label, self.provider_name_input)
         form_layout.addRow(provider_id_label, self.provider_id_input)
         form_layout.addRow(self.model_lob_label, self.model_lob_dropdown)
-        form_layout.addRow(self.model_type_label, self.model_type_dropdown)
         form_layout.addRow(self.anaylst_label, self.analyst_combo)
         form_layout.addRow(self.cycle_label, self.cycle_combo)
+        form_layout.addRow(self.model_type_label, self.model_type_dropdown)
 
         # only show patient checkboxes when the model type is 'facility'
 
@@ -270,11 +270,26 @@ class SingleIdDialog(QDialog):
         """Show an error popup"""
         QMessageBox.critical(self, "Validation Error", error_message)
 
+    def selected_model_category(self) -> str:
+        """What to return or put in the excel file based on what category is selected in the form"""
+        if self.in_patient_only_checkbox.isChecked() and self.out_patient_only_checkbox.isChecked():
+            return "BOTH"
+        elif self.in_patient_only_checkbox.isChecked():
+            return "IN-PATIENT-ONLY"
+        elif self.out_patient_only_checkbox.isChecked():
+            return "OUT-PATIENT-ONLY"
+        elif self.clinic_checkbox.isChecked():
+            return "CLINIC"
+        elif self.clinic_and_anesthesia_checkbox.isChecked():
+            return "CLINIC AND ANESTHEISA"
+        else:
+            return "NONE"
+
     def write_data_to_file(self) -> None:
         print("\n=== Starting write_data_to_file ===")
         # create a file from the form's data
         destination_path = os.path.join(
-            f"{self.utils.get_current_year_directory()}",
+            f"{self.utils.get_current_year_directory()}", f"{self.cycle_combo.currentText()}",
             f"{self.provider_name_input.text().title()}-{self.utils.format_model_type_name(self.model_type_dropdown.currentText())}",
         )
 
@@ -288,6 +303,7 @@ class SingleIdDialog(QDialog):
                 "Model Line of Business": [self.model_lob_dropdown.currentText()],
                 "Model Type": [self.utils.format_model_type_name(self.model_type_dropdown.currentText())],
                 "Financial Analyst": [self.analyst_combo.currentText().title()],
+                "Model Category": [self.selected_model_category()]
             }
         )
 
