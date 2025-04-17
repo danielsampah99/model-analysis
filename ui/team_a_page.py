@@ -1,13 +1,12 @@
 import os
 
 from PyQt6.QtWidgets import (
-    QTabWidget,
-    QVBoxLayout,
-    QWidget,
+	QTabWidget,
+	QVBoxLayout,
+	QWidget,
 )
 
-from ui.users import Users
-
+from .paramters_tab import ParamtersTab
 from .search_tab import SearchTab
 
 # import datetime
@@ -18,19 +17,21 @@ base_directory = os.getcwd()
 
 
 class TeamAPage(QWidget):
-    def __init__(self) -> None:
-        super().__init__()
+	def __init__(self) -> None:
+		super().__init__()
 
-        tabs = QTabWidget()
-        tabs.setTabPosition(QTabWidget.TabPosition.West)
-        tabs.setMovable(True)
+		tabs = QTabWidget()
+		tabs.setTabPosition(QTabWidget.TabPosition.West)
+		tabs.setMovable(True)
 
-        self.search_tab = SearchTab()
+		self.search_tab = SearchTab()
+		self.paramters_tab = ParamtersTab()
 
-        tabs.addTab(self.search_tab, "Search")
+		tabs.addTab(self.search_tab, "Search")
+		tabs.addTab(self.paramters_tab, "Parameters")
 
-        page_layout = QVBoxLayout()
+		page_layout = QVBoxLayout()
 
-        page_layout.addWidget(tabs)
+		page_layout.addWidget(tabs)
 
-        self.setLayout(page_layout)
+		self.setLayout(page_layout)

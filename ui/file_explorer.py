@@ -66,73 +66,73 @@ file_explorer_stylesheet = """
 
 
 class FileExplorer(QDockWidget):
-    file_selected = pyqtSignal(str)
-    data_loaded = pyqtSignal(pd.DataFrame)
+	file_selected = pyqtSignal(str)
+	data_loaded = pyqtSignal(pd.DataFrame)
 
-    def __init__(self, directory: str, parent=None):
-        super().__init__(parent)
+	def __init__(self, directory: str, parent=None):
+		super().__init__(parent)
 
-        # widget to hold the layout.
-        self.content_widget = QWidget()
+		# widget to hold the layout.
+		self.content_widget = QWidget()
 
-        # setup the file system model.
-        self.model = QFileSystemModel()
-        self.model.setNameFilters(["*.csv"])
-        self.model.setNameFilterDisables(False)
-        self.model.setRootPath(directory)
-        self.base_directory = directory
+		# setup the file system model.
+		self.model = QFileSystemModel()
+		self.model.setNameFilters(["*.csv"])
+		self.model.setNameFilterDisables(False)
+		self.model.setRootPath(directory)
+		self.base_directory = directory
 
-        # Set up the tree view.
-        self.tree_view = QTreeView()
-        self.tree_view.setAnimated(True)
-        self.tree_view.setModel(self.model)
-        self.tree_view.setRootIndex(self.model.index(directory))
+		# Set up the tree view.
+		self.tree_view = QTreeView()
+		self.tree_view.setAnimated(True)
+		self.tree_view.setModel(self.model)
+		self.tree_view.setRootIndex(self.model.index(directory))
 
-        # only show the file name column
-        self.tree_view.setHeaderHidden(True)
-        self.tree_view.hideColumn(1)  # Size
-        self.tree_view.hideColumn(2)  # Type
-        self.tree_view.hideColumn(3)  # Date Modified
+		# only show the file name column
+		self.tree_view.setHeaderHidden(True)
+		self.tree_view.hideColumn(1)  # Size
+		self.tree_view.hideColumn(2)  # Type
+		self.tree_view.hideColumn(3)  # Date Modified
 
-        # handle file selection
-        self.tree_view.clicked.connect(self._on_file_clicked)
+		# handle file selection
+		self.tree_view.clicked.connect(self._on_file_clicked)
 
-        self.current_selected_file: Optional[str] = None
+		self.current_selected_file: Optional[str] = None
 
-        self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea)
-        self.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetClosable
-            | QDockWidget.DockWidgetFeature.DockWidgetMovable
-            | QDockWidget.DockWidgetFeature.DockWidgetFloatable
-        )
+		self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea)
+		self.setFeatures(
+			QDockWidget.DockWidgetFeature.DockWidgetClosable
+			| QDockWidget.DockWidgetFeature.DockWidgetMovable
+			| QDockWidget.DockWidgetFeature.DockWidgetFloatable
+		)
 
-        # Create the layout without the parent.
+		# Create the layout without the parent.
 
-        file_explorer_layout = QVBoxLayout()
-        file_explorer_layout.setContentsMargins(0, -50, 5, 20)
-        file_explorer_layout.addWidget(self.tree_view)
+		file_explorer_layout = QVBoxLayout()
+		file_explorer_layout.setContentsMargins(0, -50, 5, 20)
+		file_explorer_layout.addWidget(self.tree_view)
 
-        # set the layout to the content widget
-        self.content_widget.setLayout(file_explorer_layout)
-        self.setWidget(self.content_widget)
+		# set the layout to the content widget
+		self.content_widget.setLayout(file_explorer_layout)
+		self.setWidget(self.content_widget)
 
-    @pyqtSlot(QModelIndex)
-    def _on_file_clicked(self, index):
-        file_path = self.model.filePath(index)
-        if os.path.isfile(file_path):
-            try:
-                file_data = pd.read_csv(file_path)
-                self.file_selected.emit(file_path)
-                self.data_loaded.emit(file_data)
-            except Exception as e:
-                QMessageBox.warning(self, "Error", f"Failed to load file: {str(e)}")
+	@pyqtSlot(QModelIndex)
+	def _on_file_clicked(self, index):
+		file_path = self.model.filePath(index)
+		if os.path.isfile(file_path):
+			try:
+				file_data = pd.read_csv(file_path)
+				self.file_selected.emit(file_path)
+				self.data_loaded.emit(file_data)
+			except Exception as e:
+				QMessageBox.warning(self, "Error", f"Failed to load file: {str(e)}")
 
-    def refresh(self):
-        """Refresh the file system view"""
-        # Force the model to refresh its data
-        current_index = self.tree_view.currentIndex()
-        self.model.setRootPath("")  # Reset root path
-        self.model.setRootPath(self.base_directory)  # Set it back
-        self.tree_view.setRootIndex(self.model.index(self.base_directory))
-        if current_index.isValid():
-            self.tree_view.setCurrentIndex(current_index)
+	def refresh(self):
+		"""Refresh the file system view"""
+		# Force the model to refresh its data
+		current_index = self.tree_view.currentIndex()
+		self.model.setRootPath("")  # Reset root path
+		self.model.setRootPath(self.base_directory)  # Set it back
+		self.tree_view.setRootIndex(self.model.index(self.base_directory))
+		if current_index.isValid():
+			self.tree_view.setCurrentIndex(current_index)
