@@ -1,7 +1,6 @@
 
-indent-width = 4
+# quote-style = "double"indent-width = 4
 line-length = 120
-# quote-style = "double"
 # indent-style = "space"
 # docstring-code-format = true
 
