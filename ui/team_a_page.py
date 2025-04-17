@@ -35,6 +35,8 @@ class TeamAPage(QWidget):
 		tabs.addTab(self.run_data_tab, "Run Data")
 		tabs.addTab(self.paramters_tab, "Parameters")
 
+		tabs.setCurrentIndex(1)
+
 		page_layout = QVBoxLayout()
 
 		page_layout.addWidget(tabs)

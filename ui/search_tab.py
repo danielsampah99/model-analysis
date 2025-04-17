@@ -118,7 +118,8 @@ class SearchTab(QWidget):
 		# upload_button.setMinimumHeight(40)
 		# upload_button.setMaximumWidth(200)
 		# upload_button.setIconSize(QSize(20, 20))
-		# upload_button.setStyleSheet("background-color: #3b82f6; padding: 8px 12px; color: white; font-weight: 600; border-radius: 6px; font-size: 14px; line-height: 20px; font-weight: 600;")
+		# upload_button.setStyleSheet("background-color: #3b82f6; padding: 8px 12px; color: white; font-weight: 600; border-radius: 6px;
+		# font-size: 14px; line-height: 20px; font-weight: 600;")
 		#
 		# # Keyboard shortcut for the upload button.
 		# upload_button_shortcut = QKeySequence("CTRL+U")
